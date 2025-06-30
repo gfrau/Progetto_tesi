@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - FHIR Epidemiology</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="icon" href="/static/favicon.ico">
+</head>
+<body>
+
+  <!-- Riga azzurra (titolo) -->
+  <header class="navbar">
+    <div><strong>FHIR Epidemiology</strong></div>
+  </header>
+
+  <!-- Menu sotto la riga azzurra -->
+  <nav class="menu-bar">
+    <a href="/home" class="menu-link {% if page == 'home' %}active{% endif %}">Home</a>
+    <a href="/dashboard" class="menu-link {% if page == 'dashboard' %}active{% endif %}">Dashboard</a>
+    <span class="menu-user">Utente: <strong>gigi</strong> | Ruolo: <strong>Admin</strong></span>
+    <a href="/logout" class="menu-link">Logout</a>
+  </nav>
+
+  <main class="container">
+    <div class="kpi-container">
+      <div class="kpi-card"><h2 id="kpiPatients">--</h2><p>Pazienti</p></div>
+      <div class="kpi-card"><h2 id="kpiIncontri">--</h2><p>Ricoveri</p></div>
+      <div class="kpi-card"><h2 id="kpiParametri">--</h2><p>Parametri clinici</p></div>
+    </div>
+
+    <div class="chart-section">
+      <div class="chart-wrapper">
+        <label for="aggregationField1">Grafico 1:</label>
+        <select id="aggregationField1">
+          <option value="gender">Genere</option>
+          <option value="code">Codice LOINC</option>
+          <option value="status">Stato Encounter</option>
+          <option value="age_group">Fasce di età</option>
+        </select>
+        <canvas id="chart1"></canvas>
+      </div>
+      <div class="chart-wrapper">
+        <label for="aggregationField2">Grafico 2:</label>
+        <select id="aggregationField2">
+          <option value="gender">Genere</option>
+          <option value="code">Codice LOINC</option>
+          <option value="status">Stato Encounter</option>
+          <option value="age_group">Fasce di età</option>
+        </select>
+        <canvas id="chart2"></canvas>
+      </div>
+    </div>
+  </main>
+
+  <script src="/static/js/dashboard.js"></script>
+</body>
+</html>

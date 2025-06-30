@@ -1,0 +1,15 @@
+<!-- templates/upload_csv.html -->
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Carica CSV</title>
+</head>
+<body>
+    <h2>Carica file CSV</h2>
+    <form action="/upload/csv" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".csv" required>
+        <button type="submit">Carica</button>
+    </form>
+</body>
+</html>

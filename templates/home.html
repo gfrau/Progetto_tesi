@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Home - FHIR Epidemiology</title>
+  <link rel="stylesheet" href="/static/css/style.css">
+  <link rel="icon" href="/static/favicon.ico">
+</head>
+<body>
+
+  <!-- Riga azzurra (titolo) -->
+  <header class="navbar">
+    <div><strong>DASHBOARD EPIDEMIOLOGICA</strong></div>
+  </header>
+
+  <!-- Menu sotto la riga azzurra -->
+  <nav class="menu-bar">
+    <a href="/home" class="menu-link {% if page == 'home' %}active{% endif %}">Home</a>
+    <a href="/upload" class="menu-link {% if page == 'upload' %}active{% endif %}">Upload</a>
+    <a href="/dashboard" class="menu-link {% if page == 'dashboard' %}active{% endif %}">Dashboard</a>
+    <span class="menu-user">Utente: <strong>gigi</strong> | Ruolo: <strong>Admin</strong></span>
+    <a href="/logout" class="menu-link">Logout</a>
+  </nav>
+
+  <main class="container">
+    <h1>Benvenuto nella Home</h1>
+    <p>Qui trovi le intestazioni corrette per preparare i file CSV da caricare:</p>
+
+    <h3>✅ Template CSV:</h3>
+    <ul>
+      <li><strong>Patient:</strong> nome, cognome, codice_fiscale, data_nascita, telefono, indirizzo, citta, cap</li>
+      <li><strong>Encounter:</strong> identifier, status, class, subject, start, end</li>
+      <li><strong>Observation:</strong> identifier, status, code, value, unit, effectiveDateTime, subject</li>
+    </ul>
+
+    <h3>Scarica i Template:</h3>
+<div class="template-download" style="display: flex; gap: 10px; flex-wrap: wrap">
+  <a href="/template/patient.csv" class="btn btn-primary">⬇️ Patient.csv</a>
+  <a href="/template/encounter.csv" class="btn btn-success">⬇️ Encounter.csv</a>
+  <a href="/template/observation.csv" class="btn btn-warning">⬇️ Observation.csv</a>
+  <a href="/template/unified.json" class="btn btn-secondary">⬇️ Unified.json</a>
+</div>
+  </main>
+
+</body>
+</html>

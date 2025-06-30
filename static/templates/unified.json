@@ -1,0 +1,64 @@
+[
+  {
+    "resourceType": "Patient",
+    "identifier": [
+      {
+        "system": "http://example.org/cf",
+        "value": "RSSMRA85T10A562S"
+      }
+    ],
+    "name": [
+      {
+        "family": "Rossi",
+        "given": [
+          "Mario"
+        ]
+      }
+    ],
+    "birthDate": "1985-12-10"
+  },
+  {
+    "resourceType": "Encounter",
+    "identifier": [
+      {
+        "value": "enc-001"
+      }
+    ],
+    "status": "finished",
+    "class": {
+      "code": "AMB"
+    },
+    "subject": {
+      "reference": "Patient/RSSMRA85T10A562S"
+    },
+    "period": {
+      "start": "2024-06-01T10:00:00Z",
+      "end": "2024-06-01T11:00:00Z"
+    }
+  },
+  {
+    "resourceType": "Observation",
+    "identifier": [
+      {
+        "value": "obs-001"
+      }
+    ],
+    "status": "final",
+    "code": {
+      "coding": [
+        {
+          "system": "http://loinc.org",
+          "code": "718-7"
+        }
+      ]
+    },
+    "valueQuantity": {
+      "value": 6.3,
+      "unit": "mg/dL"
+    },
+    "effectiveDateTime": "2024-06-01T10:30:00Z",
+    "subject": {
+      "reference": "Patient/RSSMRA85T10A562S"
+    }
+  }
+]

@@ -1,0 +1,84 @@
+import hashlib
+from app.utils.lonic import is_valid_loinc_code
+
+def map_csv_to_fhir_resource(row: dict) -> tuple[str, dict]:
+    """
+    Mappa una riga CSV a una risorsa FHIR Patient, Encounter o Observation.
+    Ritorna una tupla (resourceType, fhir_dict)
+    """
+    def hash_identifier(value: str) -> str:
+        return f"anon-{hashlib.sha256(value.encode()).hexdigest()[:8]}"
+
+    row = {k.strip().lower(): v.strip() for k, v in row.items() if v.strip()}
+
+    # Mappatura Patient
+    if "codice_fiscale" in row and "nome" in row and "cognome" in row:
+        codice_fiscale = row.get("codice_fiscale")
+        birth_date = row.get("data_nascita")
+        gender = row.get("sesso", "").lower()
+
+        resource = {
+            "resourceType": "Patient",
+            "identifier": [{"value": hash_identifier(codice_fiscale)}] if codice_fiscale else [],
+            "birthDate": birth_date,
+            "gender": gender if gender in ["male", "female", "other", "unknown"] else "unknown",
+            "name": [{
+                "family": row.get("cognome"),
+                "given": [row.get("nome")]
+            }]
+        }
+        return "Patient", resource
+
+    # Mappatura Encounter
+    if "encounter_id" in row and "codice_fiscale" in row:
+        resource = {
+            "resourceType": "Encounter",
+            "identifier": [{"value": row.get("encounter_id")}],
+            "status": row.get("status", "finished"),
+            "class": {"code": row.get("class", "AMB")},
+            "subject": {
+                "identifier": {
+                    "value": hash_identifier(row.get("codice_fiscale"))
+                }
+            },
+            "period": {
+                "start": row.get("data_inizio"),
+                "end": row.get("data_fine")
+            }
+        }
+        return "Encounter", resource
+
+    # Mappatura Observation
+    if "observation_id" in row and "codice_fiscale" in row:
+        code = row.get("codice_test")
+        value = row.get("valore")
+        unit = row.get("unita_misura", "1")
+        resource = {
+            "resourceType": "Observation",
+            "identifier": [{"value": row.get("observation_id")}],
+            "status": row.get("status", "final"),
+            "code": {
+                "coding": [{
+                    "system": "http://loinc.org",
+                    "code": code,
+                    "display": row.get("descrizione_test", "")
+                }]
+            },
+            "subject": {
+                "identifier": {
+                    "value": hash_identifier(row.get("codice_fiscale"))
+                }
+            },
+            "effectiveDateTime": row.get("data_osservazione"),
+            "valueQuantity": {
+                "value": float(value) if value.replace('.', '', 1).isdigit() else None,
+                "unit": unit
+            }
+        }
+
+        if not is_valid_loinc_code(code):
+            raise ValueError(f"Codice LOINC non valido: {code}")
+
+        return "Observation", resource
+
+    raise ValueError("Tipo di risorsa non riconosciuto o campi insufficienti")

@@ -1,0 +1,102 @@
+[
+  {
+    "resourceType": "Patient",
+    "identifier": [
+      {
+        "value": "P001"
+      }
+    ],
+    "gender": "female",
+    "birthDate": "1980-12-31"
+  },
+  {
+    "resourceType": "Patient",
+    "identifier": [
+      {
+        "value": "P002"
+      }
+    ],
+    "gender": "female",
+    "birthDate": "1981-12-31"
+  },
+  {
+    "resourceType": "Patient",
+    "identifier": [
+      {
+        "value": "P003"
+      }
+    ],
+    "gender": "male",
+    "birthDate": "1982-12-31"
+  },
+  {
+    "resourceType": "Patient",
+    "identifier": [
+      {
+        "value": "P004"
+      }
+    ],
+    "gender": "female",
+    "birthDate": "1983-12-31"
+  },
+  {
+    "resourceType": "Patient",
+    "identifier": [
+      {
+        "value": "P005"
+      }
+    ],
+    "gender": "male",
+    "birthDate": "1984-12-30"
+  },
+  {
+    "resourceType": "Patient",
+    "identifier": [
+      {
+        "value": "P006"
+      }
+    ],
+    "gender": "male",
+    "birthDate": "1985-12-30"
+  },
+  {
+    "resourceType": "Patient",
+    "identifier": [
+      {
+        "value": "P007"
+      }
+    ],
+    "gender": "female",
+    "birthDate": "1986-12-30"
+  },
+  {
+    "resourceType": "Patient",
+    "identifier": [
+      {
+        "value": "P008"
+      }
+    ],
+    "gender": "female",
+    "birthDate": "1987-12-30"
+  },
+  {
+    "resourceType": "Patient",
+    "identifier": [
+      {
+        "value": "P009"
+      }
+    ],
+    "gender": "male",
+    "birthDate": "1988-12-29"
+  },
+  {
+    "resourceType": "Patient",
+    "identifier": [
+      {
+        "value": "P010"
+      }
+    ],
+    "gender": "female",
+    "birthDate": "1989-12-29"
+  }
+]

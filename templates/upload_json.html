@@ -1,0 +1,15 @@
+<!-- templates/upload_json.html -->
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <title>Carica JSON</title>
+</head>
+<body>
+    <h2>Carica file JSON</h2>
+    <form action="/upload/json" method="post" enctype="multipart/form-data">
+        <input type="file" name="file" accept=".json" required>
+        <button type="submit">Carica</button>
+    </form>
+</body>
+</html>
