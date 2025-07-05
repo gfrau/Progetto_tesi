@@ -1,6 +1,6 @@
 # app/models/loinc.py
 from sqlalchemy import Column, Integer, String
-from app.services.db import Base
+from app.base import Base
 
 class LOINCCodes(Base):
     __tablename__ = "loinc_codes"

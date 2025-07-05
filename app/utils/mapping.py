@@ -82,3 +82,49 @@ def map_csv_to_fhir_resource(row: dict) -> tuple[str, dict]:
         return "Observation", resource
 
     raise ValueError("Tipo di risorsa non riconosciuto o campi insufficienti")
+
+from app.utils.anonymization import anonymize_patient
+
+def csv_to_patient(row: dict) -> dict:
+    """
+    Converte una riga CSV in una risorsa FHIR Patient anonima.
+    """
+    codice_fiscale = row.get("codice_fiscale", "").strip()
+
+    if not codice_fiscale:
+        raise ValueError("Codice fiscale mancante")
+
+    # Normalizzazione del campo gender
+    raw_gender = row.get("gender", "").strip().lower()
+    gender_map = {
+        "m": "male",
+        "f": "female",
+        "maschio": "male",
+        "femmina": "female"
+    }
+    gender = gender_map.get(raw_gender, raw_gender if raw_gender in ["male", "female", "other", "unknown"] else "unknown")
+
+    fhir_patient = {
+        "resourceType": "Patient",
+        "identifier": [{
+            "system": "urn:oid:2.16.840.1.113883.2.9.4.3.2",  # ✅ Codice fiscale (Agenzia delle Entrate)
+            "value": codice_fiscale
+        }],
+        "birthDate": row.get("data_nascita", "").strip(),
+        "gender": gender,
+        "name": [{
+            "given": [row.get("nome", "").strip()],
+            "family": row.get("cognome", "").strip()
+        }],
+        "telecom": [{
+            "system": "phone",
+            "value": row.get("telefono", "").strip()
+        }],
+        "address": [{
+            "line": [row.get("indirizzo", "").strip()],
+            "city": row.get("citta", "").strip(),
+            "postalCode": row.get("cap", "").strip()
+        }]
+    }
+
+    return anonymize_patient(fhir_patient)

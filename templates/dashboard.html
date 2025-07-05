@@ -2,7 +2,7 @@
 <html lang="it">
 <head>
   <meta charset="UTF-8">
-  <title>Dashboard - FHIR Epidemiology</title>
+  <title>Dashboard</title>
   <link rel="stylesheet" href="/static/css/style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="icon" href="/static/favicon.ico">
@@ -14,13 +14,8 @@
     <div><strong>FHIR Epidemiology</strong></div>
   </header>
 
-  <!-- Menu sotto la riga azzurra -->
-  <nav class="menu-bar">
-    <a href="/home" class="menu-link {% if page == 'home' %}active{% endif %}">Home</a>
-    <a href="/dashboard" class="menu-link {% if page == 'dashboard' %}active{% endif %}">Dashboard</a>
-    <span class="menu-user">Utente: <strong>gigi</strong> | Ruolo: <strong>Admin</strong></span>
-    <a href="/logout" class="menu-link">Logout</a>
-  </nav>
+  {% include "partials/navbar.html" %}
+
 
   <main class="container">
     <div class="kpi-container">
@@ -55,4 +50,7 @@
 
   <script src="/static/js/dashboard.js"></script>
 </body>
+
+<footer class="site-footer"> {% include 'footer.html' %} </footer>
+
 </html>

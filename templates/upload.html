@@ -1,50 +1,49 @@
 
-<!DOCTYPE html>
-<html lang="it">
-<head>
-  <meta charset="UTF-8">
-  <title>Upload - FHIR Epidemiology</title>
-  <link rel="stylesheet" href="/static/css/style.css">
-  <link rel="icon" href="/static/favicon.ico">
-</head>
-<body>
+{% extends "base.html" %}
+{% block title %}Upload{% endblock %}
 
-  <!-- Barra azzurra -->
-  <header class="navbar">
-    <div><strong>FHIR Epidemiology</strong></div>
-  </header>
+{% block content %}
+<h1>Upload dei dati FHIR</h1>
+<p class="description">Carica i tuoi file CSV o JSON per singole risorse, oppure un file unificato con dati misti.</p>
 
-  <!-- Menu di navigazione -->
-  <nav class="menu-bar">
-    <a href="/home" class="menu-link">Home</a>
-    <a href="/dashboard" class="menu-link">Dashboard</a>
-    <a href="/upload" class="menu-link active">Upload</a>
-    <span class="menu-user">Utente: <strong>gigi</strong> | Ruolo: <strong>Admin</strong></span>
-    <a href="/logout" class="menu-link">Logout</a>
-  </nav>
+<div class="upload-group">
+  <h2>Carica file CSV</h2>
+  <form action="/api/upload/patient/csv" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" accept=".csv" required>
+    <button type="submit" class="btn btn-primary">Carica Patient CSV</button>
+  </form>
+  <form action="/api/upload/encounter/csv" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" accept=".csv" required>
+    <button type="submit" class="btn btn-success">Carica Encounter CSV</button>
+  </form>
+  <form action="/api/upload/observation/csv" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" accept=".csv" required>
+    <button type="submit" class="btn btn-warning">Carica Observation CSV</button>
+  </form>
+</div>
 
-  <main class="container">
-    <h1>Upload dei dati FHIR</h1>
-    <p>Da questa pagina puoi caricare i file CSV o JSON per singole risorse o un file unico contenente dati misti.</p>
+<div class="upload-group">
+  <h2>Carica file JSON</h2>
+  <form action="/api/upload/patient/json" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" accept=".json" required>
+    <button type="submit" class="btn btn-primary">Carica Patient JSON</button>
+  </form>
+  <form action="/api/upload/encounter/json" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" accept=".json" required>
+    <button type="submit" class="btn btn-success">Carica Encounter JSON</button>
+  </form>
+  <form action="/api/upload/observation/json" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" accept=".json" required>
+    <button type="submit" class="btn btn-warning">Carica Observation JSON</button>
+  </form>
+</div>
 
-    <h3>📄 Carica file CSV</h3>
-    <ul>
-      <li><a href="/docs#/default/upload_patient_csv_api_upload_patient_csv_post" class="btn btn-primary">Carica Patient CSV</a></li>
-      <li><a href="/docs#/default/upload_encounter_csv_api_upload_encounter_csv_post" class="btn btn-success">Carica Encounter CSV</a></li>
-      <li><a href="/docs#/default/upload_observation_csv_api_upload_observation_csv_post" class="btn btn-warning">Carica Observation CSV</a></li>
-    </ul>
+<div class="upload-group">
+  <h2>Caricamento Unificato</h2>
+  <form action="/api/upload/unified" method="post" enctype="multipart/form-data">
+    <input type="file" name="file" accept=".csv,.json" required>
+    <button type="submit" class="btn btn-secondary">Upload Dati Reali</button>
+  </form>
+</div>
 
-    <h3>🗂️ Carica file JSON</h3>
-    <ul>
-      <li><a href="/docs#/default/upload_patient_json_api_upload_patient_json_post" class="btn btn-primary">Carica Patient JSON</a></li>
-      <li><a href="/docs#/default/upload_encounter_json_api_upload_encounter_json_post" class="btn btn-success">Carica Encounter JSON</a></li>
-      <li><a href="/docs#/default/upload_observation_json_api_upload_observation_json_post" class="btn btn-warning">Carica Observation JSON</a></li>
-    </ul>
-
-    <h3>✅ Caricamento unificato</h3>
-    <p>Carica un file CSV o JSON con dati misti (Patient, Encounter, Observation).</p>
-    <a href="/docs#/default/upload_unified_data_api_upload_unified_data_post" class="btn btn-secondary">Upload Dati Reali</a>
-  </main>
-
-</body>
-</html>
+{% endblock %}

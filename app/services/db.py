@@ -1,7 +1,9 @@
 import os
 from sqlalchemy import create_engine
-from sqlalchemy.orm import sessionmaker, scoped_session, Session
-from app.base import Base
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import sessionmaker, scoped_session
+
+# from app.models import Observation, Encounter, Patient
 
 # Configurazione da variabili d'ambiente
 DB_USER = os.getenv("POSTGRES_USER", "postgres")
@@ -46,18 +48,14 @@ def reset_database():
 
 
 def save_or_deduplicate_patient(db_session, fhir_data: dict) -> tuple:
-    """
-    Anonimizza il paziente e lo salva solo se non esiste già nel database.
-    Restituisce (inserito: bool, dati: dict)
-    """
-    data_anon = anonymize_patient(fhir_data)
-    identifier = data_anon.get("identifier", [{}])[0].get("value")
+    from app.models.patient import Patient  # ✅ spostato qui per evitare import circolare
 
+    identifier = fhir_data.get("identifier", [{}])[0].get("value")
     existing = db_session.query(Patient).filter_by(identifier=identifier).first()
     if existing:
-        return (False, data_anon)
+        return (False, fhir_data)
 
-    new_patient = Patient(identifier=identifier, fhir_data=data_anon)
+    new_patient = Patient(identifier=identifier, fhir_data=fhir_data)
     db_session.add(new_patient)
     db_session.commit()
-    return (True, data_anon)
+    return (True, fhir_data)

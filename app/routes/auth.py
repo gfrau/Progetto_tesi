@@ -21,7 +21,7 @@ def login_page(request: Request):
 @router.post("/login")
 def login(request: Request, username: str = Form(...), password: str = Form(...)):
     if username == VALID_USER and password == VALID_PASSWORD:
-        response = RedirectResponse(url="/dashboard", status_code=HTTP_302_FOUND)
+        response = RedirectResponse(url="/home", status_code=HTTP_302_FOUND)
         create_session(response, username=username, role=USER_ROLE)
         return response
     return templates.TemplateResponse("login.html", {

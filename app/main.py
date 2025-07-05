@@ -1,4 +1,3 @@
-# app/main.py
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
@@ -7,11 +6,12 @@ from fastapi.requests import Request
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from datetime import datetime
-from app.services.db import Base, engine
 from fhir.resources.observation import Observation
 from app.utils.loinc_loader import populate_loinc_codes
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.staticfiles import StaticFiles
+from app.base import Base         # ✅ Base ora viene dal file app/base.py
+from app.services.db import engine
 
 from app.routes import (
     patient,

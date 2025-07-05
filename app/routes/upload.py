@@ -10,25 +10,35 @@ from fhir.resources.encounter import Encounter as FHIREncounter
 from fhir.resources.observation import Observation as FHIRObservation
 from pydantic import ValidationError
 from app.utils.lonic import is_valid_loinc_code
-from app.utils.mapping import map_csv_to_fhir_resource
+from app.utils.mapping import map_csv_to_fhir_resource, csv_to_patient
 
 router = APIRouter()
 
 
-@router.post("/api/upload/patient/csv")
+@router.post("/upload/patient/csv")
 def upload_patient_csv(file: UploadFile = File(...), db: Session = Depends(get_db_session)):
-    reader = csv.DictReader(io.StringIO(file.file.read().decode("utf-8")))
+    # Leggi e decodifica il contenuto del file
+    contents = file.file.read().decode("utf-8")
+    reader = csv.DictReader(io.StringIO(contents))
+
+    rows = list(reader)
+    print("Righe CSV:", rows)  # 👀 Debug: righe effettive lette dal file
+
     inserted, skipped = 0, 0
-    for row in reader:
+
+    for row in rows:
         try:
             fhir_data = csv_to_patient(row)
+            print("Identifier hash:", fhir_data.get("identifier", [{}])[0].get("value"))
             success, _ = save_or_deduplicate_patient(db, fhir_data)
             if success:
                 inserted += 1
             else:
                 skipped += 1
-        except Exception:
+        except Exception as e:
+            print(f"Errore nel processing della riga: {e}")
             skipped += 1
+
     return {"inserted": inserted, "skipped": skipped}
 
 

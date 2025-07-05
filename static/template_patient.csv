@@ -1,11 +1,1 @@
-identifier,name,surname,gender,birthDate
-CF00001TEST,Nome1,Cognome1,other,1971-02-02
-CF00002TEST,Nome2,Cognome2,male,1972-03-03
-CF00003TEST,Nome3,Cognome3,male,1973-04-04
-CF00004TEST,Nome4,Cognome4,male,1974-05-05
-CF00005TEST,Nome5,Cognome5,male,1975-06-06
-CF00006TEST,Nome6,Cognome6,male,1976-07-07
-CF00007TEST,Nome7,Cognome7,female,1977-08-08
-CF00008TEST,Nome8,Cognome8,male,1978-09-09
-CF00009TEST,Nome9,Cognome9,other,1979-10-10
-CF00010TEST,Nome10,Cognome10,other,1980-11-11
+codice_fiscale,nome,cognome,data_nascita,gender,telefono,indirizzo,citta,cap

@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, String
 from sqlalchemy.dialects.postgresql import JSONB
-from app.services.db import Base
+from app.base import Base
 
 class Observation(Base):
     __tablename__ = "observations"
