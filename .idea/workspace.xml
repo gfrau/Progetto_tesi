@@ -4,32 +4,13 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="73a2d709-0896-4b80-ad05-861ea87787af" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/base.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/footer.html" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/templates/partials/navbar.html" afterDir="false" />
+    <list default="true" id="73a2d709-0896-4b80-ad05-861ea87787af" name="Changes" comment="grafica e logica aggiornata">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/models/encounter.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/encounter.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/models/loinc.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/loinc.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/models/observation.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/observation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/models/patient.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/patient.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routes/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/auth.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/routes/upload.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/upload.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/db.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/utils/lonic.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/utils/loinc.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/utils/mapping.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/utils/mapping.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/csv_test_encounters.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/csv_test_observations.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/csv_test_patients.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/test_encounters.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/test_observations.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/test_patients.json" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/static/css/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/style.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/template_patient.csv" beforeDir="false" afterPath="$PROJECT_DIR$/static/template_patient.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/dashboard.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/home.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/login.html" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/upload.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/upload.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -164,12 +145,33 @@
       <workItem from="1751490043709" duration="611000" />
       <workItem from="1751562718865" duration="4572000" />
       <workItem from="1751642877338" duration="3225000" />
-      <workItem from="1751726910539" duration="23000" />
+      <workItem from="1751726910539" duration="9075000" />
     </task>
+    <task id="LOCAL-00001" summary="grafica e logica aggiornata">
+      <option name="closed" value="true" />
+      <created>1751727093376</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1751727093376</updated>
+    </task>
+    <task id="LOCAL-00002" summary="grafica e logica aggiornata">
+      <option name="closed" value="true" />
+      <created>1751727099039</created>
+      <option name="number" value="00002" />
+      <option name="presentableId" value="LOCAL-00002" />
+      <option name="project" value="LOCAL" />
+      <updated>1751727099039</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="grafica e logica aggiornata" />
+    <option name="LAST_COMMIT_MESSAGE" value="grafica e logica aggiornata" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -178,11 +180,6 @@
           <url>file://$PROJECT_DIR$/.venv/lib/python3.11/site-packages/sqlalchemy/orm/decl_api.py</url>
           <line>9</line>
           <option name="timeStamp" value="1" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/app/routes/upload.py</url>
-          <line>86</line>
-          <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

@@ -1,3 +1,4 @@
+
 import csv
 import io
 import json
@@ -5,71 +6,114 @@ from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from sqlalchemy.orm import Session
 
 from app.services.db import get_db_session, save_or_deduplicate_patient
-from fhir.resources.patient import Patient as FHIRPatient
-from fhir.resources.encounter import Encounter as FHIREncounter
-from fhir.resources.observation import Observation as FHIRObservation
-from pydantic import ValidationError
-from app.utils.lonic import is_valid_loinc_code
-from app.utils.mapping import map_csv_to_fhir_resource, csv_to_patient
+from app.models.patient import Patient
+from app.models.encounter import Encounter
+from app.models.observation import Observation
+from app.utils.loinc import is_valid_loinc_code
+from app.utils.mapping import csv_to_patient, csv_to_encounter, csv_to_observation, map_csv_to_fhir_resource
 
 router = APIRouter()
+
+EXPECTED_HEADERS = {
+    "Encounter": {"encounter_id", "codice_fiscale", "status", "class", "data_inizio", "data_fine"},
+    "Patient": {"nome", "cognome", "codice_fiscale", "data_nascita", "telefono", "indirizzo", "cap", "citta", "gender"},
+    "Observation": {"observation_id", "codice_fiscale", "codice", "valore", "unita", "data_osservazione", "descrizione_test"}
+}
+
+def validate_csv_headers(headers: list[str], resource_type: str) -> bool:
+    """
+    Verifica che le intestazioni del CSV siano compatibili con il tipo di risorsa.
+    """
+    if not headers or resource_type not in EXPECTED_HEADERS:
+        return False
+    headers_lower = set(h.strip().lower() for h in headers)
+    expected = set(h.lower() for h in EXPECTED_HEADERS[resource_type])
+    return expected.issubset(headers_lower)
 
 
 @router.post("/upload/patient/csv")
 def upload_patient_csv(file: UploadFile = File(...), db: Session = Depends(get_db_session)):
-    # Leggi e decodifica il contenuto del file
-    contents = file.file.read().decode("utf-8")
-    reader = csv.DictReader(io.StringIO(contents))
+    try:
+        contents = file.file.read().decode("utf-8")
+        reader = csv.DictReader(io.StringIO(contents))
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=f"Errore nella lettura del file CSV: {str(e)}")
 
-    rows = list(reader)
-    print("Righe CSV:", rows)  # 👀 Debug: righe effettive lette dal file
+    inserted, skipped, errors = 0, 0, []
 
-    inserted, skipped = 0, 0
-
-    for row in rows:
+    for idx, row in enumerate(reader, start=2):  # Start=2 per saltare header
         try:
             fhir_data = csv_to_patient(row)
-            print("Identifier hash:", fhir_data.get("identifier", [{}])[0].get("value"))
             success, _ = save_or_deduplicate_patient(db, fhir_data)
             if success:
                 inserted += 1
             else:
                 skipped += 1
+                errors.append(f"Riga {idx}: duplicato")
         except Exception as e:
-            print(f"Errore nel processing della riga: {e}")
             skipped += 1
+            errors.append(f"Riga {idx}: {str(e)}")
 
-    return {"inserted": inserted, "skipped": skipped}
+    return {"inserted": inserted, "skipped": skipped, "errors": errors}
 
 
-@router.post("/api/upload/encounter/csv")
+from app.utils.mapping import csv_to_encounter
+from app.models import Patient, Encounter
+
+@router.post("/upload/encounter/csv")
 def upload_encounter_csv(file: UploadFile = File(...), db: Session = Depends(get_db_session)):
-    reader = csv.DictReader(io.StringIO(file.file.read().decode("utf-8")))
+    contents = file.file.read().decode("utf-8")
+    reader = csv.DictReader(io.StringIO(contents))
+
+    # Validazione intestazioni
+    if not validate_csv_headers(reader.fieldnames, "Encounter"):
+        raise HTTPException(status_code=400, detail="Le intestazioni del file CSV non corrispondono alla risorsa Encounter.")
+
     inserted, skipped = 0, 0
+    errors = []
+
     for row in reader:
         try:
             fhir_data = csv_to_encounter(row)
+            reference = fhir_data.get("subject", {}).get("reference", "")
+            patient_identifier = reference.replace("Patient/", "").strip() if reference.startswith("Patient/") else None
+
+            # Verifica che il paziente esista già nel DB
+            if not db.query(Patient).filter(Patient.identifier == patient_identifier).first():
+                skipped += 1
+                errors.append(f"Encounter scartato: paziente {patient_identifier} non trovato.")
+                continue
+
             identifier = fhir_data.get("identifier", [{}])[0].get("value")
             if db.query(Encounter).filter_by(identifier=identifier).first():
                 skipped += 1
+                errors.append(f"Encounter duplicato con ID {identifier}")
                 continue
+
             db.add(Encounter(identifier=identifier, fhir_data=fhir_data))
             inserted += 1
-        except Exception:
+        except Exception as e:
             skipped += 1
+            errors.append(f"Errore nella riga: {str(e)}")
+
     db.commit()
-    return {"inserted": inserted, "skipped": skipped}
+    return {"inserted": inserted, "skipped": skipped, "errors": errors}
 
 
-@router.post("/api/upload/observation/csv")
+@router.post("/upload/observation/csv")
 def upload_observation_csv(file: UploadFile = File(...), db: Session = Depends(get_db_session)):
-    reader = csv.DictReader(io.StringIO(file.file.read().decode("utf-8")))
+    contents = file.file.read().decode("utf-8")
+    reader = csv.DictReader(io.StringIO(contents))
+
+    if not validate_headers(reader.fieldnames, EXPECTED_HEADERS["observation"]):
+        raise HTTPException(status_code=400, detail="Le intestazioni del file CSV non corrispondono alla risorsa Observation.")
+
     inserted, skipped, errors = 0, 0, []
     for row in reader:
         try:
             fhir_data = csv_to_observation(row)
-            identifier = fhir_data.get("identifier", [{}])[0].get("value")
             code = fhir_data.get("code", {}).get("coding", [{}])[0].get("code")
+            identifier = fhir_data.get("identifier", [{}])[0].get("value")
             if not is_valid_loinc_code(code):
                 errors.append(f"Codice LOINC non valido: {code}")
                 continue
@@ -82,85 +126,3 @@ def upload_observation_csv(file: UploadFile = File(...), db: Session = Depends(g
             errors.append(str(e))
     db.commit()
     return {"inserted": inserted, "skipped": skipped, "errors": errors}
-
-
-@router.post("/api/upload/unified")
-def upload_unified_data(file: UploadFile = File(...), db: Session = Depends(get_db_session)):
-    """
-    Caricamento automatico da CSV o JSON contenente mix di risorse (Patient, Encounter, Observation).
-    Include validazione tramite fhir.resources.
-    """
-    try:
-        contents = file.file.read()
-        decoded = contents.decode("utf-8")
-    except Exception:
-        raise HTTPException(status_code=400, detail="File non leggibile")
-    finally:
-        file.file.close()
-
-    inserted, skipped, errors = 0, 0, []
-
-    try:
-        data = json.loads(decoded)
-        if isinstance(data, dict):
-            data = [data]
-    except:
-        reader = csv.DictReader(io.StringIO(decoded))
-        data = []
-        for row in reader:
-            try:
-                _, res = map_csv_to_fhir_resource(row)
-                data.append(res)
-            except Exception as e:
-                errors.append(f"Errore mappatura CSV: {str(e)}")
-
-    for entry in data:
-        rtype = entry.get("resourceType")
-        identifier = entry.get("identifier", [{}])[0].get("value")
-
-        # Validazione FHIR JSON con fhir.resources
-        try:
-            if rtype == "Patient":
-                FHIRPatient.parse_obj(entry)
-            elif rtype == "Encounter":
-                FHIREncounter.parse_obj(entry)
-            elif rtype == "Observation":
-                FHIRObservation.parse_obj(entry)
-            else:
-                errors.append(f"Tipo risorsa sconosciuto: {rtype}")
-                continue
-        except ValidationError as ve:
-            errors.append(f"Errore validazione FHIR ({rtype}): {ve.errors()}")
-            skipped += 1
-            continue
-
-        if rtype == "Patient":
-            success, _ = save_or_deduplicate_patient(db, entry)
-            inserted += 1 if success else 0
-
-        elif rtype == "Encounter":
-            if not identifier:
-                errors.append("Encounter senza identificativo")
-                continue
-            if db.query(Encounter).filter_by(identifier=identifier).first():
-                skipped += 1
-                continue
-            db.add(Encounter(identifier=identifier, fhir_data=entry))
-            inserted += 1
-
-        elif rtype == "Observation":
-            code = entry.get("code", {}).get("coding", [{}])[0].get("code")
-            if not identifier:
-                errors.append("Observation senza identificativo")
-                continue
-            if not is_valid_loinc_code(code):
-                errors.append(f"Codice LOINC non valido: {code}")
-                continue
-            if db.query(Observation).filter_by(identifier=identifier).first():
-                skipped += 1
-                continue
-            db.add(Observation(identifier=identifier, fhir_data=entry))
-            inserted += 1
-
-    db.commit()
-    return {"status": "ok", "inserted": inserted, "skipped": skipped, "errors": errors}

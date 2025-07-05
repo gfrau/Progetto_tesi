@@ -1,25 +1,36 @@
-
 {% extends "base.html" %}
 {% block title %}Upload{% endblock %}
 
 {% block content %}
 <h1>Upload dei dati FHIR</h1>
-<p class="description">Carica i tuoi file CSV o JSON per singole risorse, oppure un file unificato con dati misti.</p>
+<p class="description">Carica file CSV/JSON per risorse FHIR oppure un file unificato con dati misti.</p>
 
+<!-- Patient CSV con gestione JS -->
 <div class="upload-group">
-  <h2>Carica file CSV</h2>
-  <form action="/api/upload/patient/csv" method="post" enctype="multipart/form-data">
-    <input type="file" name="file" accept=".csv" required>
-    <button type="submit" class="btn btn-primary">Carica Patient CSV</button>
-  </form>
-  <form action="/api/upload/encounter/csv" method="post" enctype="multipart/form-data">
-    <input type="file" name="file" accept=".csv" required>
-    <button type="submit" class="btn btn-success">Carica Encounter CSV</button>
-  </form>
-  <form action="/api/upload/observation/csv" method="post" enctype="multipart/form-data">
-    <input type="file" name="file" accept=".csv" required>
-    <button type="submit" class="btn btn-warning">Carica Observation CSV</button>
-  </form>
+  <div class="upload-section">
+    <h2>Carica Patient CSV</h2>
+    <form id="patientCsvForm" enctype="multipart/form-data">
+      <input type="file" name="file" accept=".csv" required>
+      <button type="submit" class="btn btn-primary">Carica</button>
+    </form>
+  </div>
+
+  <div class="upload-section">
+    <h2>Carica Encounter CSV</h2>
+    <form id="encounterCsvForm" enctype="multipart/form-data">
+      <input type="file" name="file" accept=".csv" required>
+      <button type="submit" class="btn btn-success">Carica</button>
+    </form>
+  </div>
+
+  <div class="upload-section">
+    <h2>Carica Observation CSV</h2>
+    <form id="observationCsvForm" enctype="multipart/form-data">
+      <input type="file" name="file" accept=".csv" required>
+      <button type="submit" class="btn btn-success">Carica</button>
+    </form>
+  </div>
+
 </div>
 
 <div class="upload-group">
@@ -46,4 +57,8 @@
   </form>
 </div>
 
+<!-- Toastify -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css" />
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+<script src="/static/js/upload.js"></script>
 {% endblock %}

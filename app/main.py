@@ -3,14 +3,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import HTMLResponse
 from fastapi.requests import Request
-from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from datetime import datetime
 from fhir.resources.observation import Observation
 from app.utils.loinc_loader import populate_loinc_codes
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.staticfiles import StaticFiles
-from app.base import Base         # ✅ Base ora viene dal file app/base.py
+from app.base import Base
 from app.services.db import engine
 
 from app.routes import (
@@ -30,15 +29,10 @@ from app.routes import (
 
 
 
-
-
-
-
-# App FastAPI
 app = FastAPI(
-    title="FHIR Epidemiology Platform",
+    title="Dashboard epidemiologica",
     description="Tesi LM Ingegneria Informatica - Gianluigi Frau - Matricola XXXXXXXX",
-    version="1.0.0"
+    version="1.2.0"
 )
 
 # Session Middleware (per login/logout)
@@ -53,12 +47,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Mount static e templates
+# Static e templates
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-# Includo i router
 
+# Includo i router
 app.include_router(patient.router, prefix="/api")
 app.include_router(encounter.router, prefix="/api")
 app.include_router(observation.router, prefix="/api")
@@ -72,9 +66,6 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(auth.router)
 app.include_router(dashboard.router)
 app.include_router(template.router)
-
-
-
 
 
 
@@ -111,6 +102,7 @@ def custom_openapi():
     return app.openapi_schema
 
 app.openapi = custom_openapi
+
 
 # Creo tabelle e popolo con codici LOINC se assenti
 @app.on_event("startup")
