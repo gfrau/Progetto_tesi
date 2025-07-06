@@ -16,7 +16,7 @@ from app.routes import (
     patient,
     encounter,
     observation,
-    upload,
+    BCK_upload,
     dashboard,
     loinc,
     maintenance,
@@ -24,7 +24,8 @@ from app.routes import (
     auth,
     stats,
     frontend,
-    template
+    template,
+    BCK_test, upload, test
 )
 
 
@@ -61,15 +62,16 @@ app.include_router(loinc.router, prefix="/api")
 app.include_router(maintenance.router, prefix="/api")
 app.include_router(test_db.router, prefix="/api")
 app.include_router(stats.router, prefix="/api")
+app.include_router(test.router, prefix="/api/test")
+
+
 app.include_router(frontend.router)
-app.mount("/static", StaticFiles(directory="static"), name="static")
 app.include_router(auth.router)
 app.include_router(dashboard.router)
 app.include_router(template.router)
 
 
 
-# Rotta root (login)
 @app.get("/", response_class=HTMLResponse)
 def read_root(request: Request):
     return templates.TemplateResponse("login.html", {"request": request})

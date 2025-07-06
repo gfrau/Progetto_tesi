@@ -2,13 +2,14 @@ from . import (
     patient,
     encounter,
     observation,
-    upload,
+    BCK_upload,
     dashboard,
     loinc,
     maintenance,
     test_db,
     auth,
     stats,
-    template
+    template,
+    BCK_test
 )
 

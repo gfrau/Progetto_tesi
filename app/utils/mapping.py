@@ -1,6 +1,27 @@
 import hashlib
 from app.utils.loinc import is_valid_loinc_code
 
+
+
+def is_valid_loinc_code(code: str) -> bool:
+    """
+    Valida un codice LOINC nel formato '1234-5'.
+    - Deve contenere un trattino.
+    - Entrambe le parti devono essere numeriche.
+    """
+    if not isinstance(code, str):
+        return False
+    code = code.strip()
+    if "-" not in code:
+        return False
+    parts = code.split("-")
+    return (
+        len(parts) == 2 and
+        all(part.isdigit() for part in parts) and
+        len(parts[1]) > 0  # la seconda parte non deve essere vuota
+    )
+
+
 def map_csv_to_fhir_resource(row: dict) -> tuple[str, dict]:
     """
     Mappa una riga CSV a una risorsa FHIR Patient, Encounter o Observation.
@@ -177,26 +198,45 @@ def csv_to_encounter(row: dict) -> dict:
 def csv_to_observation(row: dict) -> dict:
     """
     Converte una riga CSV in una risorsa FHIR Observation.
+    Richiede: observation_id, codice_fiscale, codice_lonic, descrizione_test, valore, unita, data_osservazione
     """
-    codice = row.get("codice", "").strip()
+    codice = row.get("codice_lonic", "").strip()
     valore = row.get("valore", "").strip()
     unita = row.get("unita", "").strip()
-    paziente_id = row.get("codice_fiscale", "").strip()
+    codice_fiscale = row.get("codice_fiscale", "").strip()
+    descrizione = row.get("descrizione_test", "").strip()
+    data = row.get("data_osservazione", "").strip()
+    observation_id = row.get("observation_id", "").strip()
 
-    if not codice or not valore or not paziente_id:
-        raise ValueError("Dati insufficienti per Observation")
+    if not observation_id or not codice_fiscale or not codice or not valore:
+        raise ValueError("Dati insufficienti: observation_id, codice_fiscale, codice_lonic e valore sono obbligatori")
 
+    if not is_valid_loinc_code(codice):
+        print(f"[ERRORE] Codice LOINC non valido → '{codice}'")
+        raise ValueError(f"Codice LOINC non valido: {codice}")
+
+    try:
+        valore_float = float(valore)
+    except ValueError:
+        raise ValueError(f"Valore non numerico: '{valore}'")
+
+    codice_fiscale = hashlib.sha256(codice_fiscale.encode("utf-8")).hexdigest()
     return {
         "resourceType": "Observation",
-        "identifier": [{"value": f"{paziente_id}-{codice}"}],
+        "identifier": [{"value": observation_id}],
         "status": "final",
-        "subject": {"identifier": {"value": paziente_id}},
+        "subject": {"identifier": {"value": codice_fiscale}},
         "code": {
-            "coding": [{"system": "http://loinc.org", "code": codice}],
-            "text": codice
+            "coding": [{
+                "system": "http://loinc.org",
+                "code": codice,
+                "display": descrizione
+            }],
+            "text": descrizione
         },
+        "effectiveDateTime": data,
         "valueQuantity": {
-            "value": float(valore),
+            "value": valore_float,
             "unit": unita
         }
     }
@@ -207,9 +247,9 @@ def validate_csv_headers(headers: list[str], resource_type: str) -> bool:
     Verifica se le intestazioni CSV corrispondono a quelle attese per il tipo di risorsa.
     """
     expected_headers = {
-        "Patient": {"nome", "cognome", "data_nascita", "codice_fiscale", "telefono", "indirizzo", "cap", "citta", "gender"},
+        "Patient": {"nome", "cognome", "codice_fiscale", "data_nascita", "telefono", "indirizzo", "cap", "citta","gender"},
         "Encounter": {"encounter_id", "codice_fiscale", "status", "class", "data_inizio", "data_fine"},
-        "Observation": {"observation_id", "codice_fiscale", "codice_test", "descrizione_test", "valore", "unita_misura", "data_osservazione"}
+        "Observation": {"observation_id", "codice_fiscale", "codice_lonic", "descrizione_test", "valore", "unita","data_osservazione"}
     }
 
     normalized_headers = {h.strip().lower() for h in headers}

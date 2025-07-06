@@ -16,3 +16,7 @@ async def show_dashboard(request: Request):
 @router.get("/upload", response_class=HTMLResponse)
 async def show_upload(request: Request):
     return templates.TemplateResponse("upload.html", {"request": request, "page": "upload"})
+
+@router.get("/test", response_class=HTMLResponse)
+def get_test_page(request: Request):
+    return templates.TemplateResponse("test.html", {"request": request})
