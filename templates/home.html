@@ -1,42 +1,59 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-  <meta charset="UTF-8">
-  <title>Home - DASHBOARD EPIDEMIOLOGICA</title>
-  <link rel="stylesheet" href="/static/css/style.css">
-  <link rel="icon" href="/static/favicon.ico">
-</head>
-<body>
+{% extends "base.html" %}
 
-  <!-- Riga azzurra (titolo) -->
-  <header class="navbar">
-    <div><strong>DASHBOARD EPIDEMIOLOGICA</strong></div>
-  </header>
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h1 class="card-title text-center mb-4">Benvenuto nella piattaforma FHIR</h1>
+    <p class="card-text text-center text-muted mb-4">
+      Carica i tuoi dati sanitari in formato CSV o JSON per generare risorse FHIR. Segui la guida alle intestazioni per garantire il corretto import.
+    </p>
 
-  {% include "partials/navbar.html" %}
+    <div class="row gy-4">
 
+      <div class="col-md-4">
+        <div class="border rounded p-3 h-100">
+          <h5 class="mb-2">CSV Pazienti</h5>
+          <p class="text-muted small">Template CSV per importare i pazienti.</p>
+          <a href="/static/template/patient.csv" class="btn btn-outline-primary w-100">Scarica template</a>
+        </div>
+      </div>
 
-  <main class="container">
-    <h1>Benvenuto nella Home</h1>
-    <p>Qui trovi le intestazioni corrette per preparare i file CSV da caricare:</p>
+      <div class="col-md-4">
+        <div class="border rounded p-3 h-100">
+          <h5 class="mb-2">CSV Encounter</h5>
+          <p class="text-muted small">Template CSV per importare i contatti clinici.</p>
+          <a href="/static/template/encounter_template.csv" class="btn btn-outline-primary w-100">Scarica template</a>
+        </div>
+      </div>
 
-    <h3>✅ Template CSV:</h3>
-    <ul>
-      <li><strong>Patient:</strong> nome, cognome, codice_fiscale, data_nascita, telefono, indirizzo, citta, cap</li>
-      <li><strong>Encounter:</strong> identifier, status, class, subject, start, end</li>
-      <li><strong>Observation:</strong> identifier, status, code, value, unit, effectiveDateTime, subject</li>
-    </ul>
+      <div class="col-md-4">
+        <div class="border rounded p-3 h-100">
+          <h5 class="mb-2">CSV Observation</h5>
+          <p class="text-muted small">Template CSV per caricare le osservazioni cliniche.</p>
+          <a href="/static/template/observation.csv" class="btn btn-outline-primary w-100">Scarica template</a>
+        </div>
+      </div>
+    </div>
 
-    <h3>Scarica i Template:</h3>
-<div class="template-download" style="display: flex; gap: 10px; flex-wrap: wrap">
-  <a href="/template/patient.csv" class="btn btn-primary">⬇️ Patient.csv</a>
-  <a href="/template/encounter.csv" class="btn btn-success">⬇️ Encounter.csv</a>
-  <a href="/template/observation.csv" class="btn btn-warning">⬇️ Observation.csv</a>
-  <a href="/template/unified.json" class="btn btn-secondary">⬇️ Unified.json</a>
+    <div class="mt-5"></div>
+
+    <div class="row gy-4">
+     <div class="border rounded p-3">
+    <h5 class="mb-2">Esempi JSON</h5>
+    <p class="text-muted small">Scarica risorse JSON valide per test o integrazione.</p>
+    <div class="d-flex gap-2 flex-wrap">
+      <a href="/static/template/patient.json" class="btn btn-outline-secondary">Esempio Patient</a>
+      <a href="/static/template/encounter.json" class="btn btn-outline-secondary">Esempio Encounter</a>
+      <a href="/static/template/observation.json" class="btn btn-outline-secondary">Esempio Observation</a>
+    </div>
+  </div>
 </div>
-  </main>
 
-</body>
-
-<footer class="site-footer"> {% include 'footer.html' %} </footer>
-</html>
+    <div class="text-center mt-5">
+      <p class="text-muted small">
+        Per ciascun file, assicurati che le intestazioni rispettino esattamente il formato indicato nei template. I dati saranno anonimizzati automaticamente.
+      </p>
+    </div>
+  </div>
+</div>
+{% endblock %}

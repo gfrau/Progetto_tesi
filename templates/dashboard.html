@@ -1,56 +1,72 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-  <meta charset="UTF-8">
-  <title>Dashboard</title>
-  <link rel="stylesheet" href="/static/css/style.css">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-  <link rel="icon" href="/static/favicon.ico">
-</head>
-<body>
+{% extends "base.html" %}
 
-  <!-- Riga azzurra (titolo) -->
-  <header class="navbar">
-    <div><strong>FHIR Epidemiology</strong></div>
-  </header>
+{% block title %}Dashboard{% endblock %}
 
-  {% include "partials/navbar.html" %}
+{% block content %}
+<div class="container mt-4">
+  <div class="text-center mb-4">
+    <h2 class="fw-bold">Dashboard epidemiologica</h2>
+    <p class="text-muted">Visualizza i principali indicatori e grafici</p>
+  </div>
 
-
-  <main class="container">
-    <div class="kpi-container">
-      <div class="kpi-card"><h2 id="kpiPatients">--</h2><p>Pazienti</p></div>
-      <div class="kpi-card"><h2 id="kpiIncontri">--</h2><p>Ricoveri</p></div>
-      <div class="kpi-card"><h2 id="kpiParametri">--</h2><p>Parametri clinici</p></div>
-    </div>
-
-    <div class="chart-section">
-      <div class="chart-wrapper">
-        <label for="aggregationField1">Grafico 1:</label>
-        <select id="aggregationField1">
-          <option value="gender">Genere</option>
-          <option value="code">Codice LOINC</option>
-          <option value="status">Stato Encounter</option>
-          <option value="age_group">Fasce di età</option>
-        </select>
-        <canvas id="chart1"></canvas>
-      </div>
-      <div class="chart-wrapper">
-        <label for="aggregationField2">Grafico 2:</label>
-        <select id="aggregationField2">
-          <option value="gender">Genere</option>
-          <option value="code">Codice LOINC</option>
-          <option value="status">Stato Encounter</option>
-          <option value="age_group">Fasce di età</option>
-        </select>
-        <canvas id="chart2"></canvas>
+  <div class="row text-center mb-5">
+    <div class="col-md-4 mb-3">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h3 id="kpiPatients" class="fw-bold text-primary">--</h3>
+          <p class="mb-0">Pazienti</p>
+        </div>
       </div>
     </div>
-  </main>
+    <div class="col-md-4 mb-3">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h3 id="kpiIncontri" class="fw-bold text-success">--</h3>
+          <p class="mb-0">Ricoveri</p>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-4 mb-3">
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <h3 id="kpiParametri" class="fw-bold text-warning">--</h3>
+          <p class="mb-0">Parametri clinici</p>
+        </div>
+      </div>
+    </div>
+  </div>
 
-  <script src="/static/js/dashboard.js"></script>
-</body>
-
-<footer class="site-footer"> {% include 'footer.html' %} </footer>
-
-</html>
+  <div class="row">
+    <div class="col-md-6 mb-4">
+      <div class="card shadow-sm">
+        <div class="card-header bg-light fw-semibold">Grafico 1</div>
+        <div class="card-body">
+          <select id="aggregationField1" class="form-select mb-3">
+            <option value="gender">Genere</option>
+            <option value="code">Codice LOINC</option>
+            <option value="status">Stato Encounter</option>
+            <option value="age_group">Fasce di età</option>
+          </select>
+          <canvas id="chart1"></canvas>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6 mb-4">
+      <div class="card shadow-sm">
+        <div class="card-header bg-light fw-semibold">Grafico 2</div>
+        <div class="card-body">
+          <select id="aggregationField2" class="form-select mb-3">
+            <option value="gender">Genere</option>
+            <option value="code">Codice LOINC</option>
+            <option value="status">Stato Encounter</option>
+            <option value="age_group">Fasce di età</option>
+          </select>
+          <canvas id="chart2"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/static/js/dashboard.js"></script>
+{% endblock %}

@@ -1,51 +1,56 @@
-<!DOCTYPE html>
-<html lang="it">
-<head>
-  <meta charset="UTF-8">
-  <title>Verifica Integrità Dati</title>
-  <link rel="stylesheet" href="/static/css/style.css">
-  <link rel="icon" href="/static/favicon.ico">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-</head>
-<body>
-  <header class="navbar">
-    <div><strong>FHIR Epidemiology</strong></div>
-  </header>
+{% extends "base.html" %}
 
-  {% include "partials/navbar.html" %}
+{% block content %}
+<div class="card shadow-sm">
+  <div class="card-body">
+    <h1 class="card-title text-center mb-4">Verifica integrità dei dati</h1>
+    <p class="card-text text-center text-muted mb-4">
+      Esegui i test automatici per verificare la coerenza delle risorse FHIR importate.
+    </p>
 
-  <main class="container">
-    <div class="card test-card">
-      <h2>Verifica integrità dati</h2>
-      <p class="subtitle">Esegui test automatici per verificare la coerenza tra risorse FHIR già caricate nel sistema.</p>
+    <div class="row gy-4">
 
-      <div class="test-section">
-        <div class="test-item">
-          <p><strong>Test Encounter ⟶ Pazienti</strong></p>
-          <p class="test-desc">Verifica che ogni risorsa Encounter sia associata correttamente a un paziente esistente.</p>
-          <button class="btn btn-blue" onclick="checkEncounters()">Esegui test</button>
-        </div>
-
-        <div class="test-item">
-          <p><strong>Test Observation ⟶ Pazienti</strong></p>
-          <p class="test-desc">Controlla che tutte le risorse Observation abbiano riferimento a un paziente valido.</p>
-          <button class="btn btn-green" onclick="checkObservations()">Esegui test</button>
-        </div>
-
-        <div class="test-item">
-          <p><strong>Test Duplicati Pazienti</strong></p>
-          <p class="test-desc">Rileva duplicati nella tabella dei pazienti basandosi sull'identificativo anonimo (hash del codice fiscale).</p>
-          <button class="btn btn-yellow" onclick="checkDuplicates()">Esegui test</button>
+      <div class="col-md-6">
+        <div class="border rounded p-3 h-100">
+          <h5 class="mb-2">Test Encounter → Pazienti</h5>
+          <p class="text-muted small">Verifica che ogni Encounter sia collegato a un paziente esistente.</p>
+          <button class="btn btn-primary w-100" onclick="checkEncounters()">Esegui test</button>
         </div>
       </div>
+
+      <div class="col-md-6">
+        <div class="border rounded p-3 h-100">
+          <h5 class="mb-2">Test Observation → Pazienti</h5>
+          <p class="text-muted small">Verifica che tutte le Observation facciano riferimento a un paziente valido.</p>
+          <button class="btn btn-success w-100" onclick="checkObservations()">Esegui test</button>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="border rounded p-3 h-100">
+          <h5 class="mb-2">Test Duplicati Pazienti</h5>
+          <p class="text-muted small">Rileva pazienti duplicati in base all'identificativo (hash del codice fiscale).</p>
+          <button class="btn btn-warning w-100" onclick="checkDuplicates()">Esegui test</button>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div class="border rounded p-3 h-100">
+          <h5 class="mb-2">Verifica codici LOINC</h5>
+          <p class="text-muted small">
+            Controlla che i codici LOINC siano nel formato numerico corretto (es: 1234-5).
+          </p>
+          <button class="btn btn-info w-100" onclick="checkObservationLoinc()">Esegui test</button>
+        </div>
+      </div>
+
     </div>
-  </main>
+  </div>
+</div>
+<!-- Altre librerie -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+<script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 
-  <script src="/static/js/test.js"></script>
-</body>
-
-<footer class="site-footer">
-  {% include 'footer.html' %}
-</footer>
-</html>
+<!-- Il tuo JS -->
+<script src="/static/js/test.js"></script>
+{% endblock %}

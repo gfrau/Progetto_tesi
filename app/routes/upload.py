@@ -109,3 +109,5 @@ def upload_observation_csv(file: UploadFile = File(...), db: Session = Depends(g
 
     db.commit()
     return {"inserted": inserted, "skipped": skipped, "errors": errors}
+
+
