@@ -259,3 +259,10 @@ def validate_csv_headers(headers: list[str], resource_type: str) -> bool:
         return False  # Tipo non supportato
 
     return expected.issubset(normalized_headers)
+
+
+def map_json_to_fhir_resource(data: dict) -> tuple[str, dict]:
+    resource_type = data.get("resourceType")
+    if resource_type not in {"Patient", "Encounter", "Observation"}:
+        raise ValueError("Tipo di risorsa non supportato")
+    return resource_type, data

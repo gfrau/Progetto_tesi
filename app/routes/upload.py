@@ -111,3 +111,37 @@ def upload_observation_csv(file: UploadFile = File(...), db: Session = Depends(g
     return {"inserted": inserted, "skipped": skipped, "errors": errors}
 
 
+@router.post("/upload/json")
+def upload_generic_json(file: UploadFile = File(...), db: Session = Depends(get_db_session)):
+    # Legge il contenuto del file
+    try:
+        data = json.load(io.StringIO(file.file.read().decode("utf-8")))
+    except Exception:
+        raise HTTPException(status_code=400, detail="Il file JSON non è valido.")
+
+    if isinstance(data, dict):
+        data = [data]  # Un solo oggetto
+
+    inserted, skipped, errors = 0, 0, []
+
+    for entry in data:
+        try:
+            resource_type, fhir_data = map_json_to_fhir_resource(entry)
+            # Salva in base al tipo
+            if resource_type == "Patient":
+                success, _ = save_or_deduplicate_patient(db, fhir_data)
+                inserted += int(success)
+                skipped += int(not success)
+            elif resource_type == "Encounter":
+                success = save_encounter_if_valid(db, fhir_data)
+                inserted += int(success)
+                skipped += int(not success)
+            elif resource_type == "Observation":
+                success = save_observation_if_valid(db, fhir_data)
+                inserted += int(success)
+                skipped += int(not success)
+        except Exception as e:
+            skipped += 1
+            errors.append(str(e))
+
+    return {"inserted": inserted, "skipped": skipped, "errors": errors}

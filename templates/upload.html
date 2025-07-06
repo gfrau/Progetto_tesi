@@ -58,30 +58,13 @@
         <div class="card-body">
           <h5 class="card-title">Upload da JSON</h5>
 
-          <!-- Patient JSON -->
-          <form id="patientJsonForm" enctype="multipart/form-data" class="mb-3">
-            <div class="input-group">
-              <input type="file" name="file" accept=".json" required class="form-control">
-              <button type="submit" class="btn btn-primary upload-btn w-25">Upload Pazienti</button>
-            </div>
-          </form>
-
-          <!-- Encounter JSON -->
-          <form id="encounterJsonForm" enctype="multipart/form-data" class="mb-3">
-            <div class="input-group">
-              <input type="file" name="file" accept=".json" required class="form-control">
-              <button type="submit" class="btn btn-success upload-btn w-25">Upload Encounter</button>
-            </div>
-          </form>
-
-          <!-- Observation JSON -->
-          <form id="observationJsonForm" enctype="multipart/form-data">
-            <div class="input-group">
-              <input type="file" name="file" accept=".json" required class="form-control">
-              <button type="submit" class="btn btn-warning text-white upload-btn w-25">Upload Observation</button>
-            </div>
-          </form>
-        </div>
+          <!-- Upload JSON -->
+        <form id="genericJsonForm" enctype="multipart/form-data" class="mb-3">
+          <div class="input-group">
+            <input type="file" name="file" accept=".json" required class="form-control">
+            <button type="submit" class="btn btn-primary upload-btn w-25">Upload</button>
+          </div>
+        </form>
       </div>
 
     </div>

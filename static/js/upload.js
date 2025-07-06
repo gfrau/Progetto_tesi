@@ -75,7 +75,34 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
+   function handleJsonUpload() {
+    const form = document.getElementById("genericJsonForm");
+    const loader = document.getElementById("csvLoader");
+
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const formData = new FormData(form);
+      loader.style.display = "inline";
+
+      fetch("/api/upload/fhir/json", {
+        method: "POST",
+        body: formData,
+      })
+        .then(response => response.json())
+        .then(data => {
+          loader.style.display = "none";
+          showToast(`✔️ Upload completato. Inseriti: ${data.inserted}, Scartati: ${data.skipped}`, "linear-gradient(to right, #00b09b, #96c93d)");
+        })
+        .catch(error => {
+          loader.style.display = "none";
+          showToast("Errore durante l'upload JSON", "#dc2626", 6000);
+        });
+    });
+  }
+
   handleCsvUpload("patientCsvForm", "/api/upload/patient/csv");
   handleCsvUpload("encounterCsvForm", "/api/upload/encounter/csv");
   handleCsvUpload("observationCsvForm", "/api/upload/observation/csv");
+  handleJsonUpload();
 });
