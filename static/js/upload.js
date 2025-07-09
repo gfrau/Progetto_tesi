@@ -26,7 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
         // Messaggio success
         if (result.inserted > 0 || result.skipped > 0) {
           Toastify({
-            text: `✅ Inseriti: ${result.inserted} | ⛔ Scartati: ${result.skipped}`,
+            text: `Inseriti: ${result.inserted} | Scartati: ${result.skipped}`,
             duration: 3500,
             gravity: "top",
             position: "center",
@@ -44,7 +44,7 @@ document.addEventListener("DOMContentLoaded", function () {
         if (result.errors && result.errors.length > 0) {
           const errorText = result.errors.slice(0, 5).join('\n');
           Toastify({
-            text: `⚠️ Errori:\n${errorText}`,
+            text: ` Errori:\n${errorText}`,
             duration: 7000,
             gravity: "top",
             position: "center",
@@ -75,31 +75,54 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-   function handleJsonUpload() {
+    // --- JSON bulk upload
+  function handleJsonUpload() {
     const form = document.getElementById("genericJsonForm");
-    const loader = document.getElementById("csvLoader");
-
-    form.addEventListener("submit", function (e) {
+    if (!form) {
+      console.warn("Form genericJsonForm non trovato");
+      return;
+    }
+    form.addEventListener("submit", async e => {
       e.preventDefault();
+      const fd = new FormData(form);
 
-      const formData = new FormData(form);
-      loader.style.display = "inline";
+      try {
+        const resp = await fetch("/api/upload/json/bulk", { method: "POST", body: fd });
+        const res = await resp.json();
+        if (!resp.ok) throw new Error(res.detail || "Errore JSON");
 
-      fetch("/api/upload/fhir/json", {
-        method: "POST",
-        body: formData,
-      })
-        .then(response => response.json())
-        .then(data => {
-          loader.style.display = "none";
-          showToast(`✔️ Upload completato. Inseriti: ${data.inserted}, Scartati: ${data.skipped}`, "linear-gradient(to right, #00b09b, #96c93d)");
-        })
-        .catch(error => {
-          loader.style.display = "none";
-          showToast("Errore durante l'upload JSON", "#dc2626", 6000);
-        });
+        Toastify({
+          text: `JSON: Inseriti ${res.inserted}, Scartati ${res.skipped}`,
+          duration: 3500,
+          gravity: "top",
+          position: "center",
+          style: { background: "linear-gradient(to right, #00b09b, #96c93d)" },
+          close: true
+        }).showToast();
+
+        if (res.errors?.length) {
+          Toastify({
+            text: `JSON Errori (max 5):\n${res.errors.slice(0,5).join("\\n")}`,
+            duration: 5000,
+            gravity: "top",
+            position: "center",
+            style: { background: "#f97316", whiteSpace: "pre-line", fontSize: "0.85rem" },
+            close: true
+          }).showToast();
+        }
+      } catch (err) {
+        Toastify({
+          text: `JSON Errore: ${err.message}`,
+          duration: 5000,
+          gravity: "top",
+          position: "center",
+          style: { background: "#dc2626", color: "white", fontWeight: "bold" },
+          close: true
+        }).showToast();
+      }
     });
   }
+
 
   handleCsvUpload("patientCsvForm", "/api/upload/patient/csv");
   handleCsvUpload("encounterCsvForm", "/api/upload/encounter/csv");

@@ -16,7 +16,6 @@ from app.routes import (
     patient,
     encounter,
     observation,
-    BCK_upload,
     dashboard,
     loinc,
     maintenance,
@@ -25,7 +24,8 @@ from app.routes import (
     stats,
     frontend,
     template,
-    BCK_test, upload, test
+    upload,
+    test
 )
 
 

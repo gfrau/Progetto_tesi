@@ -1,6 +1,5 @@
 
-import csv
-import io
+import csv, json, io
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from sqlalchemy.orm import Session
 
@@ -9,10 +8,12 @@ from app.models.patient import Patient
 from app.models.encounter import Encounter
 from app.models.observation import Observation
 from app.utils.loinc import is_valid_loinc_code
-from app.utils.mapping import csv_to_patient, csv_to_encounter, csv_to_observation, map_csv_to_fhir_resource
+from app.utils.mapping import csv_to_patient, csv_to_encounter, csv_to_observation, map_json_to_fhir_resource
 
 router = APIRouter()
 
+
+# Headers attesi per l'upload CSV
 EXPECTED_HEADERS = {
     "Encounter": {"encounter_id", "codice_fiscale", "status", "class", "data_inizio", "data_fine"},
     "Patient": {"nome", "cognome", "codice_fiscale", "data_nascita", "telefono", "indirizzo", "cap", "citta", "gender"},
@@ -26,6 +27,8 @@ def validate_csv_headers(headers: list[str], resource_type: str) -> bool:
     expected = set(h.lower() for h in EXPECTED_HEADERS[resource_type])
     return expected.issubset(headers_lower)
 
+
+# --- Upload CSV endpoints ---
 @router.post("/upload/patient/csv")
 def upload_patient_csv(file: UploadFile = File(...), db: Session = Depends(get_db_session)):
     reader = csv.DictReader(io.StringIO(file.file.read().decode("utf-8")))
@@ -111,36 +114,75 @@ def upload_observation_csv(file: UploadFile = File(...), db: Session = Depends(g
     return {"inserted": inserted, "skipped": skipped, "errors": errors}
 
 
-@router.post("/upload/json")
-def upload_generic_json(file: UploadFile = File(...), db: Session = Depends(get_db_session)):
-    # Legge il contenuto del file
+# --- Upload JSON mixed endpoint ---
+
+def _save_encounter(db: Session, fhir_data: dict) -> bool:
+    patient_ref = fhir_data.get("subject", {}).get("reference", "")
+    patient_id = patient_ref.replace("Patient/", "")
+    if not db.query(Patient).filter(Patient.identifier == patient_id).first():
+        return False
+
+    identifier = fhir_data.get("identifier", [{}])[0].get("value")
+    if db.query(Encounter).filter_by(identifier=identifier).first():
+        return False
+
+    db.add(Encounter(identifier=identifier, fhir_data=fhir_data))
+    db.commit()
+    return True
+
+def _save_observation(db: Session, fhir_data: dict) -> bool:
+    codice_fiscale = fhir_data.get("subject", {}).get("identifier", {}).get("value")
+    if not db.query(Patient).filter(Patient.identifier == codice_fiscale).first():
+        return False
+
+    identifier = fhir_data.get("identifier", [{}])[0].get("value")
+    if db.query(Observation).filter_by(identifier=identifier).first():
+        return False
+
+    db.add(Observation(identifier=identifier, fhir_data=fhir_data))
+    db.commit()
+    return True
+
+
+@router.post("/upload/json/bulk")
+def upload_json_bulk(file: UploadFile = File(...), db: Session = Depends(get_db_session)):
     try:
-        data = json.load(io.StringIO(file.file.read().decode("utf-8")))
-    except Exception:
+        file.file.seek(0)
+        contents = file.file.read().decode("utf-8")
+        print("[DEBUG] Contenuto JSON ricevuto:")
+        print(contents)
+        data = json.loads(contents)
+    except Exception as e:
+        print(f"[ERRORE] durante il parsing JSON: {str(e)}")
         raise HTTPException(status_code=400, detail="Il file JSON non è valido.")
 
-    if isinstance(data, dict):
-        data = [data]  # Un solo oggetto
+    if not isinstance(data, list):
+        raise HTTPException(status_code=400, detail="JSON non valido: ci si aspetta un array di oggetti.")
 
     inserted, skipped, errors = 0, 0, []
 
     for entry in data:
         try:
             resource_type, fhir_data = map_json_to_fhir_resource(entry)
-            # Salva in base al tipo
+
+            print(f"[DEBUG] Resource type: {resource_type}")
+            print(f"[DEBUG] FHIR data: {fhir_data}")
+
             if resource_type == "Patient":
                 success, _ = save_or_deduplicate_patient(db, fhir_data)
-                inserted += int(success)
-                skipped += int(not success)
             elif resource_type == "Encounter":
-                success = save_encounter_if_valid(db, fhir_data)
-                inserted += int(success)
-                skipped += int(not success)
+                success = _save_encounter(db, fhir_data)
             elif resource_type == "Observation":
-                success = save_observation_if_valid(db, fhir_data)
-                inserted += int(success)
-                skipped += int(not success)
+                success = _save_observation(db, fhir_data)
+            else:
+                raise ValueError("Tipo di risorsa non supportato.")
+
+            if success:
+                inserted += 1
+            else:
+                skipped += 1
         except Exception as e:
+            print(f"[ERRORE] durante il parsing di una risorsa: {str(e)}")
             skipped += 1
             errors.append(str(e))
 

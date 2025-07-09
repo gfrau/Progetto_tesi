@@ -9,18 +9,6 @@
   <div class="row justify-content-center">
     <div class="col-md-8">
 
-      <!-- Upload Unificato -->
-      <div class="card shadow-sm mb-4">
-        <div class="card-body">
-          <h5 class="card-title">Upload Dati FHIR (CSV o JSON)</h5>
-          <form id="unifiedForm" enctype="multipart/form-data">
-            <div class="mb-3">
-              <input type="file" name="file" accept=".csv, .json" required class="form-control">
-            </div>
-            <button type="submit" class="btn btn-dark w-100">Carica File Unificato</button>
-          </form>
-        </div>
-      </div>
 
       <!-- CSV Section -->
       <div class="card shadow-sm mb-4">
@@ -76,3 +64,4 @@
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script src="{{ url_for('static', path='/js/upload.js') }}"></script>
 {% endblock %}
+</div>
