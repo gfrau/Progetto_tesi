@@ -3,7 +3,7 @@ import csv, json, io
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from sqlalchemy.orm import Session
 
-from app.services.db import get_db_session, save_or_deduplicate_patient
+from app.services.db import *
 from app.models.patient import Patient
 from app.models.encounter import Encounter
 from app.models.observation import Observation
@@ -115,35 +115,6 @@ def upload_observation_csv(file: UploadFile = File(...), db: Session = Depends(g
 
 
 # --- Upload JSON mixed endpoint ---
-
-def _save_encounter(db: Session, fhir_data: dict) -> bool:
-    patient_ref = fhir_data.get("subject", {}).get("reference", "")
-    patient_id = patient_ref.replace("Patient/", "")
-    if not db.query(Patient).filter(Patient.identifier == patient_id).first():
-        return False
-
-    identifier = fhir_data.get("identifier", [{}])[0].get("value")
-    if db.query(Encounter).filter_by(identifier=identifier).first():
-        return False
-
-    db.add(Encounter(identifier=identifier, fhir_data=fhir_data))
-    db.commit()
-    return True
-
-def _save_observation(db: Session, fhir_data: dict) -> bool:
-    codice_fiscale = fhir_data.get("subject", {}).get("identifier", {}).get("value")
-    if not db.query(Patient).filter(Patient.identifier == codice_fiscale).first():
-        return False
-
-    identifier = fhir_data.get("identifier", [{}])[0].get("value")
-    if db.query(Observation).filter_by(identifier=identifier).first():
-        return False
-
-    db.add(Observation(identifier=identifier, fhir_data=fhir_data))
-    db.commit()
-    return True
-
-
 @router.post("/upload/json/bulk")
 def upload_json_bulk(file: UploadFile = File(...), db: Session = Depends(get_db_session)):
     try:
@@ -171,19 +142,24 @@ def upload_json_bulk(file: UploadFile = File(...), db: Session = Depends(get_db_
             if resource_type == "Patient":
                 success, _ = save_or_deduplicate_patient(db, fhir_data)
             elif resource_type == "Encounter":
-                success = _save_encounter(db, fhir_data)
+                success = save_encounter_if_valid(db, fhir_data)
             elif resource_type == "Observation":
-                success = _save_observation(db, fhir_data)
+                success = save_observation_if_valid(db, fhir_data)
             else:
                 raise ValueError("Tipo di risorsa non supportato.")
 
             if success:
                 inserted += 1
             else:
-                skipped += 1
+                raise ValueError("risorsa duplicata o referenza non valida")
+
         except Exception as e:
-            print(f"[ERRORE] durante il parsing di una risorsa: {str(e)}")
             skipped += 1
-            errors.append(str(e))
+            identifier = entry.get("identifier", [{}])[0].get("value", "sconosciuto")
+            resource_type = entry.get("resourceType", "Unknown")
+            error_msg = f"{resource_type} {identifier}: {str(e)}"
+            print(f"[ERRORE] {error_msg}")
+            errors.append(error_msg)
+
 
     return {"inserted": inserted, "skipped": skipped, "errors": errors}

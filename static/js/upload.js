@@ -42,10 +42,10 @@ document.addEventListener("DOMContentLoaded", function () {
 
         // Mostra eventuali errori dettagliati
         if (result.errors && result.errors.length > 0) {
-          const errorText = result.errors.slice(0, 5).join('\n');
+          const errorText = result.errors.slice(0, 15).join('\n');
           Toastify({
             text: ` Errori:\n${errorText}`,
-            duration: 7000,
+            duration: -1,
             gravity: "top",
             position: "center",
             offset: { y: 250 },
@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", function () {
       } catch (err) {
         Toastify({
           text: `Errore: ${err.message || "Errore durante l'upload"}`,
-          duration: 8000,
+          duration: -1,
           gravity: "top",
           position: "center",
           offset: { y: 150 },
@@ -93,7 +93,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         Toastify({
           text: `JSON: Inseriti ${res.inserted}, Scartati ${res.skipped}`,
-          duration: 3500,
+          duration: 5000,
           gravity: "top",
           position: "center",
           style: { background: "linear-gradient(to right, #00b09b, #96c93d)" },
@@ -102,8 +102,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (res.errors?.length) {
           Toastify({
-            text: `JSON Errori (max 5):\n${res.errors.slice(0,5).join("\\n")}`,
-            duration: 5000,
+            text: `JSON Errori:\n${res.errors.slice(0,15).join("\\n")}`,
+            duration: -1,
             gravity: "top",
             position: "center",
             style: { background: "#f97316", whiteSpace: "pre-line", fontSize: "0.85rem" },
@@ -113,7 +113,7 @@ document.addEventListener("DOMContentLoaded", function () {
       } catch (err) {
         Toastify({
           text: `JSON Errore: ${err.message}`,
-          duration: 5000,
+          duration: -1,
           gravity: "top",
           position: "center",
           style: { background: "#dc2626", color: "white", fontWeight: "bold" },

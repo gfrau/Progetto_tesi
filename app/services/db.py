@@ -1,7 +1,9 @@
 import os
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy.orm import sessionmaker, scoped_session
+from sqlalchemy.orm import sessionmaker, scoped_session, Session
+
+from app.models import Encounter, Observation, Patient
 
 # from app.models import Observation, Encounter, Patient
 
@@ -48,7 +50,7 @@ def reset_database():
 
 
 def save_or_deduplicate_patient(db_session, fhir_data: dict) -> tuple:
-    from app.models.patient import Patient  # ✅ spostato qui per evitare import circolare
+    from app.models.patient import Patient  # per evitare import circolare
 
     identifier = fhir_data.get("identifier", [{}])[0].get("value")
     existing = db_session.query(Patient).filter_by(identifier=identifier).first()
@@ -59,3 +61,31 @@ def save_or_deduplicate_patient(db_session, fhir_data: dict) -> tuple:
     db_session.add(new_patient)
     db_session.commit()
     return (True, fhir_data)
+
+def save_encounter_if_valid(db: Session, fhir_data: dict) -> bool:
+    patient_ref = fhir_data.get("subject", {}).get("reference", "")
+    patient_id = patient_ref.replace("Patient/", "")
+    if not db.query(Patient).filter(Patient.identifier == patient_id).first():
+        return False
+
+    identifier = fhir_data.get("identifier", [{}])[0].get("value")
+    if db.query(Encounter).filter_by(identifier=identifier).first():
+        return False
+
+    db.add(Encounter(identifier=identifier, fhir_data=fhir_data))
+    db.commit()
+    return True
+
+
+def save_observation_if_valid(db: Session, fhir_data: dict) -> bool:
+    codice_fiscale = fhir_data.get("subject", {}).get("identifier", {}).get("value")
+    if not db.query(Patient).filter(Patient.identifier == codice_fiscale).first():
+        return False
+
+    identifier = fhir_data.get("identifier", [{}])[0].get("value")
+    if db.query(Observation).filter_by(identifier=identifier).first():
+        return False
+
+    db.add(Observation(identifier=identifier, fhir_data=fhir_data))
+    db.commit()
+    return True
