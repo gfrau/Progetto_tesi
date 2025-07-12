@@ -172,6 +172,7 @@ def csv_to_encounter(row: dict) -> dict:
 
     # Calcolo dell’hash del codice fiscale per collegare al Patient
     patient_identifier_hash = hashlib.sha256(codice_fiscale.encode("utf-8")).hexdigest()
+    print(f"[DEBUG] Codice fiscale: {codice_fiscale} -> Hash: {patient_identifier_hash}")
 
     fhir_encounter = {
         "resourceType": "Encounter",
@@ -187,7 +188,9 @@ def csv_to_encounter(row: dict) -> dict:
             "end": end_date
         },
         "subject": {
-            "reference": f"Patient/{patient_identifier_hash}"
+            "identifier": {
+                "value": patient_identifier_hash
+            }
         }
     }
 

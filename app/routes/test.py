@@ -19,23 +19,43 @@ def test_duplicates(db: Session = Depends(get_db_session)):
 
 
 @router.get("/encounter-links")
-@router.get("/encounter-links")
 def test_encounter_links(db: Session = Depends(get_db_session)):
-    encounters = db.query(Encounter).all()
-    broken = [e.identifier for e in encounters if not e.fhir_data.get("subject", {}).get("reference")]
-    return {"broken_count": len(broken), "broken_links": broken}
+    from app.models.patient import Patient
 
+    encounters = db.query(Encounter).all()
+    patients = db.query(Patient.identifier).all()
+    patient_ids = {p.identifier for p in patients}
+
+    broken = []
+
+    for e in encounters:
+        subject = e.fhir_data.get("subject", {})
+        patient_id = None
+
+        if "reference" in subject:
+            patient_id = subject["reference"].replace("Patient/", "")
+        elif "identifier" in subject:
+            patient_id = subject["identifier"].get("value")
+
+        if not patient_id or patient_id not in patient_ids:
+            broken.append(e.identifier)
+
+    return {"broken_count": len(broken), "broken_links": broken}
 
 
 @router.get("/observation-links")
 def test_observation_links(db: Session = Depends(get_db_session)):
-    broken = []
-    for obs in db.query(Observation).all():
-        identifier = obs.fhir_data.get("subject", {}).get("identifier", {}).get("value")
-        if not identifier or not db.query(Patient).filter_by(identifier=identifier).first():
-            broken.append(obs.identifier)
-    print(f"[TEST] Observation scollegate: {len(broken)}")
-    return {"broken_count": len(broken), "broken_links": broken}
+    observations = db.query(Observation).all()
+
+    if not observations:
+        return {"status": "empty", "message": "Nessuna risorsa Observation presente."}
+
+    broken = [
+        obs.identifier for obs in observations
+        if not obs.fhir_data.get("subject", {}).get("identifier", {}).get("value")
+    ]
+    return {"status": "ok", "broken_count": len(broken), "broken_links": broken}
+
 
 @router.get("/observation-loinc")
 def test_observation_loinc(db: Session = Depends(get_db_session)):

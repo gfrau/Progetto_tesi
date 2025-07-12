@@ -60,18 +60,28 @@ def upload_encounter_csv(file: UploadFile = File(...), db: Session = Depends(get
     for row in reader:
         try:
             fhir_data = csv_to_encounter(row)
-            patient_identifier = fhir_data.get("subject", {}).get("reference", "").replace("Patient/", "")
+
+            # ✅ Estrai l'identificatore anonimo dal campo corretto
+            patient_identifier = fhir_data.get("subject", {}).get("identifier", {}).get("value", "")
+
             if not db.query(Patient).filter(Patient.identifier == patient_identifier).first():
+                print(f"[SCARTATO] Paziente non trovato: hash = {patient_identifier}")
                 skipped += 1
                 continue
+
             identifier = fhir_data.get("identifier", [{}])[0].get("value")
             if db.query(Encounter).filter_by(identifier=identifier).first():
+                print(f"[SCARTATO] Encounter duplicato: {identifier}")
                 skipped += 1
                 continue
+
             db.add(Encounter(identifier=identifier, fhir_data=fhir_data))
             inserted += 1
-        except Exception:
+
+        except Exception as e:
+            print(f"[SCARTATO] Errore nella riga: {row} -> {e}")
             skipped += 1
+
     db.commit()
     return {"inserted": inserted, "skipped": skipped}
 

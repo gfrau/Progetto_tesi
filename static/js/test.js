@@ -1,14 +1,21 @@
-
 function showToast(message, type = "primary") {
   const bootstrapColors = {
-    primary: "#0d6efd",
-    success: "#198754",
-    danger: "#dc3545",
-    warning: "#ffc107",
-    info: "#0dcaf0",
-    dark: "#212529",
-    light: "#f8f9fa"
+    primary: "#0d6efd",   // blu
+    success: "#198754",   // verde
+    danger: "#dc3545",    // rosso
+    warning: "#ffc107",   // arancione
+    info: "#0dcaf0",      // azzurro
+    dark: "#212529",      // grigio scuro
+    light: "#f8f9fa"      // bianco
   };
+
+  const textColors = {
+    light: "#000",  // testo scuro su sfondo chiaro
+    warning: "#000",
+    default: "#fff" // testo bianco su sfondo scuro
+  };
+
+  const textColor = textColors[type] || textColors.default;
 
   Toastify({
     text: message,
@@ -18,7 +25,7 @@ function showToast(message, type = "primary") {
     close: true,
     style: {
       background: bootstrapColors[type] || bootstrapColors.primary,
-      color: "#fff",
+      color: textColor,
       fontFamily: "'Segoe UI', Roboto, sans-serif",
       fontSize: "0.95rem",
       borderRadius: "0.375rem",
@@ -45,26 +52,35 @@ function checkEncounters() {
     });
 }
 
+
 function checkObservations() {
+  console.log("➡️ Chiamata a /api/test/observation-links");
+
   fetch('/api/test/observation-links')
     .then(res => {
       if (!res.ok) throw new Error("Errore HTTP " + res.status);
       return res.json();
     })
     .then(data => {
+      console.log("📦 Risposta ricevuta:", data);
+
+      if (data.status === "empty") {
+        showToast("Nessuna risorsa Observation presente nel sistema.", "warning");
+      return;
+      }
+
       const count = Number(data.broken_count);
-      if (!isNaN(count) && count === 0) {
-        showToast("✓ Tutte le Observation sono collegate a pazienti.", "linear-gradient(to right, #00c851, #007e33)");
-      } else if (!isNaN(count)) {
-        showToast(`✖ ${count} Observation scollegate da pazienti.`, "linear-gradient(to right, #ff5f6d, #ffc371)");
-        console.warn("Observation scollegate:", data.broken_links);
+
+      if (count === 0) {
+        showToast("Tutte le Observation sono collegate a pazienti.", "success");
       } else {
-        showToast("⚠ Dato 'broken_count' non valido o mancante.", "linear-gradient(to right, #ff9966, #ff5e62)");
+        showToast(`${count} Observation scollegate da pazienti.`, "danger");
+        console.warn("Observation scollegate:", data.broken_links);
       }
     })
     .catch(error => {
-      showToast(`✖ Errore: ${error.message}`, "linear-gradient(to right, #ff416c, #ff4b2b)");
-      console.error("Errore osservazioni:", error);
+      showBootstrapToast(`Errore: ${error.message}`, "Errore", "danger");
+      console.error("Errore durante il controllo delle observation:", error);
     });
 }
 
@@ -138,5 +154,116 @@ function checkObservationDuplicates() {
     .catch(err => {
       showToast("Errore durante il test Observation duplicati", "linear-gradient(to right, #ff416c, #ff4b2b)");
       console.error(err);
+    });
+}
+
+function renderTable(data) {
+  const tableHead = document.getElementById("data-table-head");
+  const tableBody = document.getElementById("data-table-body");
+
+  tableHead.innerHTML = "";
+  tableBody.innerHTML = "";
+
+  if (!Array.isArray(data) || data.length === 0) {
+    tableBody.innerHTML = "<tr><td colspan='6' class='text-center text-muted'>Nessun dato disponibile.</td></tr>";
+    return;
+  }
+
+  const headerLabels = {
+    "resourceType": "Tipo Risorsa",
+    "identifier.0.value": "ID Risorsa",
+    "subject.identifier.value": "ID Paziente",
+    "name.0.family": "Cognome",
+    "name.0.given.0": "Nome",
+    "birthDate": "Data di Nascita",
+    "gender": "Sesso",
+    "address.0.city": "Città",
+    "address.0.state": "Provincia",
+    "address.0.postalCode": "CAP",
+    "address.0.line.0": "Indirizzo",
+    "period.start": "Data Inizio",
+    "period.end": "Data Fine",
+    "status": "Stato",
+    "class.code": "Classe",
+    "code.coding.0.display": "Test",
+    "code.coding.0.code": "Codice LOINC",
+    "effectiveDateTime": "Data Osservazione",
+    "valueQuantity.value": "Valore",
+    "valueQuantity.unit": "Unità"
+  };
+
+  const getLabel = key => headerLabels[key] || key;
+
+  const resourceType = data[0].resourceType;
+  const headersByType = {
+    "Patient": [
+      "resourceType", "identifier.0.value", "name.0.family", "name.0.given.0",
+      "birthDate", "gender", "address.0.line.0", "address.0.city",
+      "address.0.state", "address.0.postalCode"
+    ],
+    "Encounter": [
+      "resourceType", "identifier.0.value", "status", "class.code",
+      "period.start", "period.end", "subject.identifier.value"
+    ],
+    "Observation": [
+      "resourceType", "identifier.0.value", "code.coding.0.display", "code.coding.0.code",
+      "valueQuantity.value", "valueQuantity.unit", "effectiveDateTime", "subject.identifier.value"
+    ]
+};
+
+  const headers = headersByType[resourceType] || Object.keys(flattenObject(data[0]));
+
+  // Intestazioni
+  tableHead.innerHTML = `<tr>${headers.map(h => `<th>${getLabel(h)}</th>`).join("")}</tr>`;
+
+  // Corpo
+  data.forEach(item => {
+    const flat = flattenObject(item);
+    const row = document.createElement("tr");
+    headers.forEach(h => {
+      let val = flat[h] ?? "—";
+
+      // Format date
+      if (h.toLowerCase().includes("date") && val !== "—") {
+        try {
+          val = new Date(val).toLocaleDateString("it-IT", {
+            day: "2-digit", month: "long", year: "numeric"
+          });
+        } catch (_) {}
+      }
+
+      row.innerHTML += `<td>${val}</td>`;
+    });
+    tableBody.appendChild(row);
+  });
+}
+
+function flattenObject(obj, prefix = "", res = {}) {
+  for (const key in obj) {
+    const val = obj[key];
+    const newKey = prefix ? `${prefix}.${key}` : key;
+    if (Array.isArray(val)) {
+      if (val.length > 0 && typeof val[0] === "object") {
+        flattenObject(val[0], `${newKey}.0`, res);
+      } else {
+        res[newKey] = val.join(", ");
+      }
+    } else if (typeof val === "object" && val !== null) {
+      flattenObject(val, newKey, res);
+    } else {
+      res[newKey] = val;
+    }
+  }
+  return res;
+}
+
+function loadTestData(resourceType) {
+  fetch(`/test/data/${resourceType}`)
+    .then(res => res.json())
+    .then(data => renderTable(data))
+    .catch(err => {
+      console.error("Errore caricamento dati:", err);
+      document.getElementById("data-table-body").innerHTML =
+        `<tr><td colspan="6" class="text-danger">Errore durante il caricamento dei dati</td></tr>`;
     });
 }

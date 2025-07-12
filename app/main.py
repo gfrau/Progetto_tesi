@@ -25,7 +25,8 @@ from app.routes import (
     frontend,
     template,
     upload,
-    test
+    test,
+    test_data
 )
 
 
@@ -63,6 +64,7 @@ app.include_router(maintenance.router, prefix="/api")
 app.include_router(test_db.router, prefix="/api")
 app.include_router(stats.router, prefix="/api")
 app.include_router(test.router, prefix="/api/test")
+app.include_router(test_data.router, prefix="/test/data")
 
 
 app.include_router(frontend.router)

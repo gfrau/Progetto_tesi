@@ -1,0 +1,52 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+  <h3 class="mb-4">Visualizzazione dati attualmente presenti</h3>
+
+  <div class="mb-5">
+    <h5>Patient</h5>
+    <table class="table table-sm table-bordered">
+      <thead>
+        <tr>
+          <th>Identifier</th>
+          <th>Gender</th>
+          <th>Birth Date</th>
+        </tr>
+      </thead>
+      <tbody id="patient-data"></tbody>
+    </table>
+  </div>
+
+  <div class="mb-5">
+    <h5>Encounter</h5>
+    <table class="table table-sm table-bordered">
+      <thead>
+        <tr>
+          <th>Identifier</th>
+          <th>Patient</th>
+          <th>Start</th>
+          <th>End</th>
+        </tr>
+      </thead>
+      <tbody id="encounter-data"></tbody>
+    </table>
+  </div>
+
+  <div class="mb-5">
+    <h5>Observation</h5>
+    <table class="table table-sm table-bordered">
+      <thead>
+        <tr>
+          <th>Identifier</th>
+          <th>Patient</th>
+          <th>Code</th>
+          <th>Value</th>
+        </tr>
+      </thead>
+      <tbody id="observation-data"></tbody>
+    </table>
+  </div>
+
+  <button class="btn btn-primary" onclick="loadAllData()">Aggiorna dati</button>
+</div>
+{% endblock %}
