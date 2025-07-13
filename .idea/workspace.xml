@@ -5,11 +5,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="73a2d709-0896-4b80-ad05-861ea87787af" name="Changes" comment="grafica e logica aggiornata">
-      <change afterPath="$PROJECT_DIR$/app/logs/audit.ndjson" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/models/audit_event.py" afterDir="false" />
       <change afterPath="$PROJECT_DIR$/app/utils/audit.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/utils/audit_logger.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/auth.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/auth.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,7 +49,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "audit",
+    "git-widget-placeholder": "dev",
     "junie.onboarding.icon.badge.shown": "true",
     "last_opened_file_path": "/Users/gianluigi.frau/Documents/TESI/Progetto_tesi/templates",
     "node.js.detected.package.eslint": "true",
@@ -157,6 +155,7 @@
       <workItem from="1751923132547" duration="2693000" />
       <workItem from="1752008579342" duration="341000" />
       <workItem from="1752080149919" duration="6487000" />
+      <workItem from="1752432090460" duration="2103000" />
     </task>
     <task id="LOCAL-00001" summary="grafica e logica aggiornata">
       <option name="closed" value="true" />

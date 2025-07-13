@@ -4,6 +4,9 @@ from starlette.status import HTTP_302_FOUND
 from fastapi.templating import Jinja2Templates
 from passlib.context import CryptContext
 
+from app.auth.dependencies import get_session
+from app.utils.audit import log_audit_event
+
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
@@ -21,6 +24,7 @@ users = {
         "role": "viewer"
     }
 }
+
 @router.get("/login", response_class=HTMLResponse)
 def login_form(request: Request):
     return templates.TemplateResponse("login.html", {"request": request, "error": None})
@@ -28,32 +32,53 @@ def login_form(request: Request):
 
 @router.post("/login")
 def login(request: Request, username: str = Form(...), password: str = Form(...)):
+    ip_address = request.client.host
     user = users.get(username)
 
-    if not user:
+    if not user or not pwd_context.verify(password, user["password"]):
+        log_audit_event(
+            event_type="110127",  # Login Failure
+            username=username,
+            success=False,
+            ip=ip_address,
+            action="E"
+        )
         return templates.TemplateResponse("login.html", {
             "request": request,
             "error": "Credenziali non valide"
         })
 
-    if not pwd_context.verify(password, user["password"]):
-        return templates.TemplateResponse("login.html", {
-            "request": request,
-            "error": "Credenziali non valide"
-        })
-
-    # Successo: crea sessione, salva ruolo, reindirizza
+    # Login successo
     session = request.session
     session["username"] = username
     session["role"] = user["role"]
 
-    if user["role"] == "admin":
-        return RedirectResponse(url="/home", status_code=302)
-    else:
-        return RedirectResponse(url="/dashboard", status_code=302)
+    log_audit_event(
+        event_type="110114",  # Login Success
+        username=username,
+        success=True,
+        ip=ip_address,
+        action="E"
+    )
+
+    redirect_url = "/home" if user["role"] == "admin" else "/dashboard"
+    return RedirectResponse(url=redirect_url, status_code=HTTP_302_FOUND)
+
 
 @router.get("/logout")
-def logout():
+def logout(request: Request):
+    session = request.session
+    username = session.get("username", "anon")
+    ip_address = request.client.host
+
+    log_audit_event(
+        event_type="110115",  # Logout
+        username=username,
+        success=True,
+        ip=ip_address,
+        action="E"
+    )
+
     response = RedirectResponse(url="/login", status_code=HTTP_302_FOUND)
     response.delete_cookie("session")
     return response
