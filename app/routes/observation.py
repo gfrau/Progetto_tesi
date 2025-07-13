@@ -7,7 +7,7 @@ from app.base import Base
 from app.models import Observation
 from app.services.db import get_db_session
 
-router = APIRouter()
+router = APIRouter(tags=["Observation"])
 
 @router.get("/observations")
 def get_all_observations(db: Session = Depends(get_db_session)):
