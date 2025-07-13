@@ -12,23 +12,7 @@ from app.models.observation import Observation
 
 router = APIRouter()
 
-@router.delete("/patients/clear")
-def clear_patients(db: Session = Depends(get_db_session), user=require_role("viewer")):
-    db.query(Patient).delete()
-    db.commit()
-    return {"status": "ok", "message": "Tutti i pazienti eliminati"}
 
-@router.delete("/encounters/clear")
-def clear_encounters(db: Session = Depends(get_db_session)):
-    db.query(Encounter).delete()
-    db.commit()
-    return {"status": "ok", "message": "Tutti gli encounter eliminati"}
-
-@router.delete("/observations/clear")
-def clear_observations(db: Session = Depends(get_db_session)):
-    db.query(Observation).delete()
-    db.commit()
-    return {"status": "ok", "message": "Tutte le observation eliminate"}
 
 @router.post("/test/anonymize")
 def test_anonymization(patients: List[Dict] = Body(...)):
