@@ -1,11 +1,14 @@
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.openapi.docs import get_swagger_ui_html, get_redoc_html
 from fastapi.openapi.utils import get_openapi
 from fastapi.responses import HTMLResponse
 from fastapi.requests import Request
 from fastapi.templating import Jinja2Templates
 from datetime import datetime
 from fhir.resources.observation import Observation
+from starlette.responses import JSONResponse
+from app.auth.dependencies import require_role
 from app.utils.loinc_loader import populate_loinc_codes
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -31,10 +34,13 @@ from app.routes import (
 
 
 
+
 app = FastAPI(
     title="Dashboard epidemiologica",
-    description="Tesi LM Ingegneria Informatica - Gianluigi Frau - Matricola XXXXXXXX",
-    version="1.2.0"
+    description="Tesi LM Ingegneria Informatica - Gianluigi Frau - Matricola 001567085",
+    version="1.2.0",
+    docs_url=None,
+    redoc_url=None
 )
 
 # Session Middleware (per login/logout)
@@ -106,6 +112,26 @@ def custom_openapi():
     return app.openapi_schema
 
 app.openapi = custom_openapi
+
+# Swagger UI accessibile solo agli admin
+@app.get("/docs", include_in_schema=False)
+async def custom_swagger_ui_html(request: Request, user=Depends(require_role("admin"))):
+    return get_swagger_ui_html(
+        openapi_url=app.openapi_url,
+        title="Documentazione API"
+    )
+
+# ReDoc accessibile solo agli admin
+@app.get("/redoc", include_in_schema=False)
+async def custom_redoc_html(request: Request, user=Depends(require_role("admin"))):
+    return get_redoc_html(
+        openapi_url=app.openapi_url,
+        title="Documentazione ReDoc"
+    )
+
+# @app.get("/openapi.json", include_in_schema=False)
+# async def get_openapi(request: Request, user=Depends(require_role("admin"))):
+#    return JSONResponse(app.openapi())
 
 
 # Creo tabelle e popolo con codici LOINC se assenti

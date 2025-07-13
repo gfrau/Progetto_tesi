@@ -2,6 +2,8 @@ from typing import List, Dict
 
 from fastapi import APIRouter, Depends, Body
 from sqlalchemy.orm import Session
+
+from app.auth.dependencies import require_role
 from app.utils.anonymization import anonymize_patient
 from app.services.db import get_db_session
 from app.models.patient import Patient
@@ -11,7 +13,7 @@ from app.models.observation import Observation
 router = APIRouter()
 
 @router.delete("/patients/clear")
-def clear_patients(db: Session = Depends(get_db_session)):
+def clear_patients(db: Session = Depends(get_db_session), user=require_role("viewer")):
     db.query(Patient).delete()
     db.commit()
     return {"status": "ok", "message": "Tutti i pazienti eliminati"}

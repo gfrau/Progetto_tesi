@@ -20,3 +20,5 @@ python-jose
 fhir.resources
 itsdangerous
 fhir.resources
+PyJWT>=2.0.0
+passlib[bcrypt]

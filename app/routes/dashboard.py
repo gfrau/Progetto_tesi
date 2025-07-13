@@ -3,6 +3,8 @@ from fastapi.responses import JSONResponse, HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session
 from sqlalchemy import func
+
+from app.auth.dependencies import require_role
 from app.services.db import SessionLocal, get_db_session
 from app.models import Patient, Encounter, Observation
 from app.utils.session_manager import get_session
@@ -21,13 +23,16 @@ def get_db():
 
 
 @router.get("/dashboard", response_class=HTMLResponse)
-def dashboard(request: Request):
+def dashboard(request: Request, user=require_role("viewer")):
     session_data = get_session(request)
     if not session_data:
         return RedirectResponse(url="/login", status_code=302)
-
-    return templates.TemplateResponse("dashboard.html", {"request": request})
-
+    else:
+        return templates.TemplateResponse("dashboard.html", {
+        "request": request,
+        "username": user["sub"],
+        "role": user["role"]
+    })
 
 
 @router.get("/upload/csv", response_class=HTMLResponse)

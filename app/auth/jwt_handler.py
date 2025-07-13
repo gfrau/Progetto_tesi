@@ -1,19 +1,17 @@
+import jwt
+from jose import jwt
 from datetime import datetime, timedelta
-from jose import jwt, JWTError
 
-SECRET_KEY = "supersegreto"
+
+# Configurazione segreta
+SECRET_KEY = "superSEGRETO25"
 ALGORITHM = "HS256"
-ACCESS_TOKEN_EXPIRE_MINUTES = 30
+ACCESS_TOKEN_EXPIRE_MINUTES = 60
 
-def create_access_token(data: dict):
-    to_encode = data.copy()
+def create_access_token(username: str, role: str) -> str:
     expire = datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    to_encode.update({"exp": expire})
+    to_encode = {"sub": username, "role": role, "exp": expire}
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
-def verify_token(token: str):
-    try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        return payload
-    except JWTError:
-        return None
+def decode_jwt(token: str):
+    return jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])

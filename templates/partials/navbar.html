@@ -8,12 +8,14 @@
 
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        {% if request.session.get('role') == 'admin' %}
         <li class="nav-item me-3">
           <a class="nav-link {% if page == 'home' %}active{% endif %}" href="/home">Home</a>
         </li>
         <li class="nav-item me-3">
           <a class="nav-link {% if page == 'upload' %}active{% endif %}" href="/upload">Upload</a>
         </li>
+        {% endif %}
         <li class="nav-item me-3">
           <a class="nav-link {% if page == 'dashboard' %}active{% endif %}" href="/dashboard">Dashboard</a>
         </li>
@@ -23,8 +25,8 @@
       </ul>
 
       <span class="navbar-text me-3">
-        Utente: <strong>gigi</strong> | Ruolo: <strong>Admin</strong>
-      </span>
+        Utente: <strong>{{ request.session.get('username', 'N/A') }}</strong> |
+        Ruolo: <strong>{{ request.session.get('role', 'N/A') }}</strong>      </span>
       <a class="btn btn-outline-danger btn-sm" href="/logout">Logout</a>
     </div>
   </div>

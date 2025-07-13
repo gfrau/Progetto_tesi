@@ -1,14 +1,17 @@
 
-import csv, json, io
-from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
-from sqlalchemy.orm import Session
+import csv
+import io
+import json
 
-from app.services.db import *
-from app.models.patient import Patient
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
+
 from app.models.encounter import Encounter
 from app.models.observation import Observation
-from app.utils.loinc import is_valid_loinc_code
+from app.models.patient import Patient
+from app.services.db import *
 from app.utils.mapping import csv_to_patient, csv_to_encounter, csv_to_observation, map_json_to_fhir_resource
+from app.auth.dependencies import require_role
+
 
 router = APIRouter()
 
@@ -30,7 +33,11 @@ def validate_csv_headers(headers: list[str], resource_type: str) -> bool:
 
 # --- Upload CSV endpoints ---
 @router.post("/upload/patient/csv")
-def upload_patient_csv(file: UploadFile = File(...), db: Session = Depends(get_db_session)):
+def upload_patient_csv(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db_session),
+    _: None = Depends(require_role("admin"))
+):
     reader = csv.DictReader(io.StringIO(file.file.read().decode("utf-8")))
     if not validate_csv_headers(reader.fieldnames, "Patient"):
         raise HTTPException(status_code=400, detail="Le intestazioni del file CSV non corrispondono alla risorsa Patient.")
@@ -49,7 +56,11 @@ def upload_patient_csv(file: UploadFile = File(...), db: Session = Depends(get_d
     return {"inserted": inserted, "skipped": skipped}
 
 @router.post("/upload/encounter/csv")
-def upload_encounter_csv(file: UploadFile = File(...), db: Session = Depends(get_db_session)):
+def upload_encounter_csv(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db_session),
+    _: None = Depends(require_role("admin"))
+):
     contents = file.file.read().decode("utf-8")
     reader = csv.DictReader(io.StringIO(contents))
 
@@ -61,7 +72,7 @@ def upload_encounter_csv(file: UploadFile = File(...), db: Session = Depends(get
         try:
             fhir_data = csv_to_encounter(row)
 
-            # ✅ Estrai l'identificatore anonimo dal campo corretto
+            # Estrai l'identificatore anonimo dal campo corretto
             patient_identifier = fhir_data.get("subject", {}).get("identifier", {}).get("value", "")
 
             if not db.query(Patient).filter(Patient.identifier == patient_identifier).first():
@@ -86,7 +97,11 @@ def upload_encounter_csv(file: UploadFile = File(...), db: Session = Depends(get
     return {"inserted": inserted, "skipped": skipped}
 
 @router.post("/upload/observation/csv")
-def upload_observation_csv(file: UploadFile = File(...), db: Session = Depends(get_db_session)):
+def upload_observation_csv(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db_session),
+    _: None = Depends(require_role("admin"))
+):
     contents = file.file.read().decode("utf-8")
     reader = csv.DictReader(io.StringIO(contents))
 
@@ -126,7 +141,11 @@ def upload_observation_csv(file: UploadFile = File(...), db: Session = Depends(g
 
 # --- Upload JSON mixed endpoint ---
 @router.post("/upload/json/bulk")
-def upload_json_bulk(file: UploadFile = File(...), db: Session = Depends(get_db_session)):
+def upload_json_bulk(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db_session),
+    _: None = Depends(require_role("admin"))
+):
     try:
         file.file.seek(0)
         contents = file.file.read().decode("utf-8")
