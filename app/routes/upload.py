@@ -13,7 +13,7 @@ from app.utils.mapping import csv_to_patient, csv_to_encounter, csv_to_observati
 from app.auth.dependencies import require_role
 
 
-router = APIRouter()
+router = APIRouter(tags=["Upload CSV/JSON"])
 
 
 # Headers attesi per l'upload CSV

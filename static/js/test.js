@@ -258,7 +258,7 @@ function flattenObject(obj, prefix = "", res = {}) {
 }
 
 function loadTestData(resourceType) {
-  fetch(`/test/data/${resourceType}`)
+  fetch(`/api/${resourceType}`)
     .then(res => res.json())
     .then(data => renderTable(data))
     .catch(err => {
