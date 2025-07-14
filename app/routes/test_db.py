@@ -1,16 +1,32 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 
-from app.auth.dependencies import require_role
-from app.services.db import get_db_session
+from app.services.db import get_db_session, reset_database
+from app.models.fhir_resource import FhirResource
 
-router = APIRouter(prefix="/api")
+router = APIRouter(prefix="/test-db", tags=["test-db"])
 
-@router.get("/ping-db", summary="Verifica connessione al DB")
-def ping_db(db: Session = Depends(get_db_session), user=(require_role("viewer"))):
+@router.get("/ping", response_model=dict)
+def ping_db(db: Session = Depends(get_db_session)):
+    """
+    Endpoint di test: verifica connessione al database.
+    """
     try:
-        db.execute(text("SELECT 1"))
-        return {"message": "Connessione al database OK"}
-    except Exception as e:
-        return {"status": "error", "detail": str(e)}
+        # Esegue una query leggera per testare la connessione
+        db.execute("SELECT 1")
+        return {"ping": "pong"}
+    except SQLAlchemyError:
+        raise HTTPException(status_code=500, detail="Database connection failed")
+
+@router.delete("/reset", response_model=dict)
+def reset_db(db: Session = Depends(get_db_session)):
+    """
+    Endpoint di test: reset della tabella fhir_resources.
+    Ritorna il numero di record eliminati.
+    """
+    # Conta quante risorse esistono prima del reset
+    count_before = db.query(FhirResource).count()
+    # Esegui il reset (svuota fhir_resources)
+    reset_database()
+    return {"deleted_count": count_before}

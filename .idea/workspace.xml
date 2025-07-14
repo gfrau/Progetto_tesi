@@ -4,7 +4,20 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="73a2d709-0896-4b80-ad05-861ea87787af" name="Changes" comment="grafica e logica aggiornata" />
+    <list default="true" id="73a2d709-0896-4b80-ad05-861ea87787af" name="Changes" comment="grafica e logica aggiornata">
+      <change afterPath="$PROJECT_DIR$/app/models/fhir_resource.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/models/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/models/encounter.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/models/observation.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/models/patient.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/encounter.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/encounter.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/observation.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/observation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/patient.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/patient.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/test_db.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/test_db.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/services/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/db.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -45,7 +58,7 @@
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "crud",
+    "git-widget-placeholder": "new-logic-db",
     "junie.onboarding.icon.badge.shown": "true",
     "last_opened_file_path": "/Users/gianluigi.frau/Documents/TESI/Progetto_tesi/templates",
     "node.js.detected.package.eslint": "true",

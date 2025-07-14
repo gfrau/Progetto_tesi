@@ -1,24 +1,22 @@
 from fastapi import APIRouter, Depends, Request, HTTPException, status, Response
-from sqlalchemy.orm import Session, session
+from sqlalchemy.orm import Session
 from starlette.responses import JSONResponse
 
 from app.auth.dependencies import require_role
-from app.models import Encounter
 from app.services.db import get_db_session
 from app.utils.audit import log_audit_event
+from app.models.fhir_resource import FhirResource
 
-router = APIRouter(tags=["Encounter"])
+router = APIRouter(prefix="/encounters", tags=["encounters"])
 
-@router.get("/encounters")
-def get_all_encounters(
+@router.get("/", response_model=list[dict])
+def list_encounters(
     request: Request,
     db: Session = Depends(get_db_session),
     _: None = Depends(require_role("viewer"))
 ):
-    encounters = db.query(Encounter).all()
-
+    rows = db.query(FhirResource).filter_by(resource_type="Encounter").all()
     session = request.session
-
     log_audit_event(
         event_type="110101",
         username=session.get("username", "anon"),
@@ -27,35 +25,38 @@ def get_all_encounters(
         action="R",
         entity_type="Encounter"
     )
-    return [e.fhir_data for e in encounters]
+    return [row.content for row in rows]
 
-
-@router.get("/encounters/{identifier}")
+@router.get("/{identifier}", response_model=dict)
 def get_encounter(
     identifier: str,
     request: Request,
     db: Session = Depends(get_db_session),
-    user=Depends(require_role("viewer"))):
-
-    enc = db.query(Encounter).filter_by(identifier=identifier).first()
-
-    if not enc:
-        raise HTTPException(404, "Encounter non trovato")
+    _: None = Depends(require_role("viewer"))
+):
+    row = (
+        db.query(FhirResource)
+          .filter(
+              FhirResource.resource_type == "Encounter",
+              FhirResource.content["id"].astext == identifier
+          )
+          .first()
+    )
+    if not row:
+        raise HTTPException(status_code=404, detail="Encounter not found")
     session = request.session
     log_audit_event(
         event_type="110101",
-        username=session.get("username","anon"),
+        username=session.get("username", "anon"),
         success=True,
         ip=request.client.host,
         action="R",
         entity_type="Encounter",
-        entity_id=identifier)
+        entity_id=identifier
+    )
+    return row.content
 
-    return enc.fhir_data
-
-
-# PUT (update) encounter
-@router.put("/encounters/{identifier}")
+@router.put("/{identifier}", response_model=dict)
 def update_encounter(
     identifier: str,
     updated_data: dict,
@@ -63,14 +64,18 @@ def update_encounter(
     db: Session = Depends(get_db_session),
     _: None = Depends(require_role("admin"))
 ):
-    encounter = db.query(Encounter).filter_by(identifier=identifier).first()
-
-    if not encounter:
-        raise HTTPException(status_code=404, detail="Encounter non trovato")
-
-    encounter.fhir_data = updated_data
+    row = (
+        db.query(FhirResource)
+          .filter(
+              FhirResource.resource_type == "Encounter",
+              FhirResource.content["id"].astext == identifier
+          )
+          .first()
+    )
+    if not row:
+        raise HTTPException(status_code=404, detail="Encounter not found")
+    row.content = updated_data
     db.commit()
-
     session = request.session
     log_audit_event(
         event_type="110102",
@@ -81,22 +86,21 @@ def update_encounter(
         entity_type="Encounter",
         entity_id=identifier
     )
-    return encounter.fhir_data
+    return row.content
 
-
-# DELETE ALL encounters
-@router.delete("/encounters/clear")
+@router.delete("/clear", response_model=dict)
 def delete_all_encounters(
     request: Request,
     db: Session = Depends(get_db_session),
     _: None = Depends(require_role("admin"))
 ):
-
-    deleted_count = db.query(Encounter).delete()
+    deleted_count = (
+        db.query(FhirResource)
+          .filter_by(resource_type="Encounter")
+          .delete(synchronize_session=False)
+    )
     db.commit()
-
     session = request.session
-
     log_audit_event(
         event_type="110107",
         username=session.get("username", "anon"),
@@ -106,32 +110,31 @@ def delete_all_encounters(
         entity_type="Encounter",
         entity_id="ALL"
     )
-
     return JSONResponse(
         status_code=status.HTTP_200_OK,
         content={"message": f"{deleted_count} Encounter eliminati."}
     )
 
-
-
-# DELETE single encounter
-@router.delete("/encounters/{identifier}")
+@router.delete("/{identifier}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_encounter(
     identifier: str,
     request: Request,
     db: Session = Depends(get_db_session),
     _: None = Depends(require_role("admin"))
 ):
-    encounter = db.query(Encounter).filter_by(identifier=identifier).first()
-
-    if not encounter:
-        raise HTTPException(status_code=404, detail="Encounter non trovato")
-
-    db.delete(encounter)
+    row = (
+        db.query(FhirResource)
+          .filter(
+              FhirResource.resource_type == "Encounter",
+              FhirResource.content["id"].astext == identifier
+          )
+          .first()
+    )
+    if not row:
+        raise HTTPException(status_code=404, detail="Encounter not found")
+    db.delete(row)
     db.commit()
-
     session = request.session
-
     log_audit_event(
         event_type="110107",
         username=session.get("username", "anon"),
@@ -142,6 +145,3 @@ def delete_encounter(
         entity_id=identifier
     )
     return Response(status_code=status.HTTP_204_NO_CONTENT)
-
-
-

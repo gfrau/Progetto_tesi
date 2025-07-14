@@ -2,12 +2,13 @@ from fastapi import FastAPI, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html, get_redoc_html
 from fastapi.openapi.utils import get_openapi
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.requests import Request
 from fastapi.templating import Jinja2Templates
 from datetime import datetime
-from fhir.resources.observation import Observation
-from starlette.responses import JSONResponse
+from starlette.responses import JSONResponse as StarletteJSONResponse
+from sqlalchemy import text, inspect
+
 from app.auth.dependencies import require_role
 from app.utils.loinc_loader import populate_loinc_codes
 from starlette.middleware.sessions import SessionMiddleware
@@ -30,9 +31,6 @@ from app.routes import (
     upload,
     test,
 )
-
-
-
 
 app = FastAPI(
     title="Dashboard epidemiologica",
@@ -58,7 +56,6 @@ app.add_middleware(
 app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
-
 # Includo i router
 app.include_router(patient.router, prefix="/api")
 app.include_router(encounter.router, prefix="/api")
@@ -74,8 +71,6 @@ app.include_router(frontend.router)
 app.include_router(auth.router)
 app.include_router(dashboard.router)
 app.include_router(template.router)
-
-
 
 @app.get("/", response_class=HTMLResponse)
 def read_root(request: Request):
@@ -126,37 +121,19 @@ async def custom_redoc_html(request: Request, user=Depends(require_role("admin")
         title="Documentazione ReDoc"
     )
 
-# @app.get("/openapi.json", include_in_schema=False)
-# async def get_openapi(request: Request, user=Depends(require_role("admin"))):
-#    return JSONResponse(app.openapi())
-
-
-# Creo tabelle e popolo con codici LOINC se assenti
+# Creo tabelle e indici solo se la tabella fhir_resources non esiste, popolo LOINC se necessario
 @app.on_event("startup")
 def on_startup():
-    Base.metadata.create_all(bind=engine)
+    inspector = inspect(engine)
+    # Se la tabella fhir_resources non esiste, crea schema e indici
+    if 'fhir_resources' not in inspector.get_table_names():
+        Base.metadata.create_all(bind=engine)
+        with engine.connect() as conn:
+            conn.execute(text(
+                "CREATE INDEX IF NOT EXISTS idx_fhir_resources_type ON fhir_resources(resource_type)"
+            ))
+            conn.execute(text(
+                "CREATE INDEX IF NOT EXISTS gin_idx_fhir_resources_content ON fhir_resources USING GIN (content)"
+            ))
+    # Popola tabella LOINC (internally verifica se già popolata)
     populate_loinc_codes()
-
-# Utility: mapping CSV → Observation FHIR
-def map_csv_row_to_fhir_observation(row: dict) -> Observation:
-    return Observation.construct(
-        resourceType="Observation",
-        status=row.get("status", "final"),
-        code={
-            "coding": [{
-                "system": "http://loinc.org",
-                "code": row.get("code", "unknown"),
-                "display": row.get("display", "unknown")
-            }]
-        },
-        subject={
-            "reference": f"Patient/{row.get('patient_id', 'unknown')}"
-        },
-        effectiveDateTime=row.get("effectiveDateTime", datetime.utcnow().isoformat()),
-        valueQuantity={
-            "value": float(row.get("value", 0)),
-            "unit": row.get("unit", "unit"),
-            "system": "http://unitsofmeasure.org",
-            "code": row.get("unit_code", "1")
-        }
-    )
