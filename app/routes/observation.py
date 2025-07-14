@@ -8,7 +8,7 @@ from app.auth.dependencies import require_role
 
 router = APIRouter(tags=["Observation"])
 
-# GET all observations
+# GET tutte observations
 @router.get("/observations")
 def get_all_observations(
     request: Request,
@@ -29,7 +29,7 @@ def get_all_observations(
     )
     return [o.fhir_data for o in observations]
 
-# GET single observation
+# GET singola  observation
 @router.get("/observations/{identifier}")
 def get_observation(identifier: str, request: Request,
     db: Session = Depends(get_db_session),
@@ -81,7 +81,7 @@ def update_observation(identifier: str, updated_data: dict, request: Request,
     return observation.fhir_data
 
 
-# DELETE all observations
+# DELETE tutte observations
 @router.delete("/observations/clear")
 def delete_all_observations(
     request: Request,
@@ -110,7 +110,7 @@ def delete_all_observations(
 
 
 
-# DELETE single observation
+# DELETE singola observation
 @router.delete("/observations/{identifier}")
 def delete_observation(identifier: str, request: Request,
     db: Session = Depends(get_db_session),
