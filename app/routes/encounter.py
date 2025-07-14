@@ -16,15 +16,14 @@ def get_all_encounters(
     _: None = Depends(require_role("viewer"))
 ):
     encounters = db.query(Encounter).all()
+
     session = request.session
-    username = session.get("username", "anon")
-    ip = request.client.hostq
 
     log_audit_event(
         event_type="110101",
-        username=username,
+        username=session.get("username", "anon"),
         success=True,
-        ip=ip,
+        ip=request.client.host,
         action="R",
         entity_type="Encounter"
     )
@@ -43,8 +42,15 @@ def get_encounter(
     if not enc:
         raise HTTPException(404, "Encounter non trovato")
     session = request.session
-    log_audit_event(event_type="110101", username=session.get("username","anon"), success=True,
-                    ip=request.client.host, action="R", entity_type="Encounter", entity_id=identifier)
+    log_audit_event(
+        event_type="110101",
+        username=session.get("username","anon"),
+        success=True,
+        ip=request.client.host,
+        action="R",
+        entity_type="Encounter",
+        entity_id=identifier)
+
     return enc.fhir_data
 
 
@@ -78,6 +84,36 @@ def update_encounter(
     return encounter.fhir_data
 
 
+# DELETE ALL encounters
+@router.delete("/encounters/clear")
+def delete_all_encounters(
+    request: Request,
+    db: Session = Depends(get_db_session),
+    _: None = Depends(require_role("admin"))
+):
+
+    deleted_count = db.query(Encounter).delete()
+    db.commit()
+
+    session = request.session
+
+    log_audit_event(
+        event_type="110107",
+        username=session.get("username", "anon"),
+        success=True,
+        ip=request.client.host,
+        action="D",
+        entity_type="Encounter",
+        entity_id="ALL"
+    )
+
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"message": f"{deleted_count} Encounter eliminati."}
+    )
+
+
+
 # DELETE single encounter
 @router.delete("/encounters/{identifier}")
 def delete_encounter(
@@ -95,6 +131,7 @@ def delete_encounter(
     db.commit()
 
     session = request.session
+
     log_audit_event(
         event_type="110107",
         username=session.get("username", "anon"),
@@ -107,32 +144,4 @@ def delete_encounter(
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-# DELETE ALL encounters
-@router.delete("/encounters/clear")
-def delete_all_encounters(
-    request: Request,
-    db: Session = Depends(get_db_session),
-    _: None = Depends(require_role("admin"))
-):
 
-    deleted_count = db.query(Encounter).delete()
-    db.commit()
-
-    session_data = request.session
-    username = session_data.get("username", "anon")
-    ip = request.client.host
-
-    log_audit_event(
-        event_type="110107",
-        username=session.get("username", "anon"),
-        success=True,
-        ip=request.client.host,
-        action="D",
-        entity_type="Encounter",
-        entity_id="ALL"
-    )
-
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content={"message": f"{deleted_count} Encounter eliminati."}
-    )

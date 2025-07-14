@@ -16,9 +16,8 @@ def get_all_patients(
     db: Session = Depends(get_db_session),
     user = Depends(require_role("viewer"))
 ):
-
-
     patients = db.query(Patient).all()
+
     session = request.session
 
     log_audit_event(
@@ -47,14 +46,12 @@ def get_patient(
         raise HTTPException(status_code=404, detail="Paziente non trovato")
 
     session_data = request.session
-    username = session_data.get("username", "anon")
-    ip = request.client.host
 
     log_audit_event(
         event_type="110101",
-        username=username,
+        username=session_data.get("username", "anon"),
         success=True,
-        ip=ip,
+        ip=request.client.host,
         action="R",  # Read
         entity_type="Patient",
         entity_id=identifier
@@ -79,19 +76,44 @@ def update_patient(identifier: str, updated_data: dict, request: Request,
     db.commit()
 
     session_data = request.session
-    username = session_data.get("username", "anon")
-    ip = request.client.host
 
     log_audit_event(
         event_type="110102",
-        username=username,
+        username=session_data.get("username", "anon"),
         success=True,
-        ip=ip,
+        ip=request.client.host,
         action="U",
         entity_type="Patient",
         entity_id=identifier
     )
     return patient.fhir_data
+
+
+@router.delete("/patients/clear")
+def delete_all_patients(
+    request: Request,
+    db: Session = Depends(get_db_session),
+    _: None = Depends(require_role("admin"))
+):
+    deleted_count = db.query(Patient).delete()
+    db.commit()
+
+    session_data = request.session
+
+    log_audit_event(
+        event_type="110107",
+        username = session_data.get("username", "anon"),
+        success=True,
+        ip = request.client.host,
+        action="D",
+        entity_type="Patient",
+        entity_id="ALL"
+    )
+
+    return JSONResponse(
+        status_code=status.HTTP_200_OK,
+        content={"message": f"{deleted_count} pazienti eliminati."}
+    )
 
 
 # DELETE singolo paziente
@@ -110,14 +132,12 @@ def delete_patient(identifier: str, request: Request,
     db.commit()
 
     session_data = request.session
-    username = session_data.get("username", "anon")
-    ip = request.client.host
 
     log_audit_event(
         event_type="110107",  # HL7 AuditEvent - Delete
-        username=username,
+        username = session_data.get("username", "anon"),
         success=True,
-        ip=ip,
+        ip = request.client.host,
         action="D",  # Delete
         entity_type="Patient",
         entity_id=identifier
@@ -125,30 +145,3 @@ def delete_patient(identifier: str, request: Request,
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
 
-@router.delete("/api/patients/clear")
-def delete_all_patients(
-    request: Request,
-    db: Session = Depends(get_db_session),
-    _: None = Depends(require_role("admin"))
-):
-    deleted_count = db.query(Patient).delete()
-    db.commit()
-
-    session_data = request.session
-    username = session_data.get("username", "anon")
-    ip = request.client.host
-
-    log_audit_event(
-        event_type="110107",
-        username=username,
-        success=True,
-        ip=ip,
-        action="D",
-        entity_type="Patient",
-        entity_id="ALL"
-    )
-
-    return JSONResponse(
-        status_code=status.HTTP_200_OK,
-        content={"message": f"{deleted_count} pazienti eliminati."}
-    )
