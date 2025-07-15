@@ -1,7 +1,7 @@
 # schemas/encounter.py
 
 from pydantic import BaseModel, Field
-from typing import Optional, Dict, Any
+from typing import List, Optional, Dict, Any, Literal
 
 
 class Reference(BaseModel):
@@ -38,7 +38,6 @@ class EncounterCreate(EncounterBase):
 
 class EncounterRead(EncounterBase):
     id: str
-    resourceType: str = Field("Encounter", const=True)
+    resourceType: Literal["Encounter"] = Field(default="Encounter")
 
-    class Config:
-        allow_population_by_field_name = True
+model_config = {"validate_by_name": True}

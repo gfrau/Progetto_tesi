@@ -1,7 +1,7 @@
 # schemas/observation.py
 
 from pydantic import BaseModel, Field
-from typing import Optional, List, Dict, Any
+from typing import List, Optional, Dict, Any, Literal
 
 
 class Reference(BaseModel):
@@ -41,4 +41,4 @@ class ObservationCreate(ObservationBase):
 
 class ObservationRead(ObservationBase):
     id: str
-    resourceType: str = Field("Observation", const=True)
+    resourceType: Literal["Observation"] = Field(default="Observation")

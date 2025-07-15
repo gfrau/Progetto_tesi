@@ -1,7 +1,9 @@
 from typing import List, Dict
 
 from fastapi import APIRouter, Depends, Body
+
 from app.auth.dependencies import require_role
+from app.schemas.loinc import LOINCCodeOut
 from app.utils.anonymization import anonymize_patient
 
 router = APIRouter()

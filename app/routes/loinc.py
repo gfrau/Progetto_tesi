@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from app.services.db import get_db_session
 from app.models.loinc import LOINCCodes
-from app.schemas.lonic import LOINCCodeOut
+from app.schemas.loinc import LOINCCodeOut
 from typing import List
 
 router = APIRouter()

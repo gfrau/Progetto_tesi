@@ -6,19 +6,16 @@
   <component name="ChangeListManager">
     <list default="true" id="73a2d709-0896-4b80-ad05-861ea87787af" name="Changes" comment="grafica e logica aggiornata">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/logs/audit.ndjson" beforeDir="false" afterPath="$PROJECT_DIR$/app/logs/audit.ndjson" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routes/dashboard.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/dashboard.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/routes/encounter.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/encounter.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/loinc.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/loinc.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/routes/maintenance.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/maintenance.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/routes/observation.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/observation.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/routes/patient.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/patient.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routes/stats.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/stats.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routes/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routes/upload.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/upload.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schemas/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/schemas/encounter.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/encounter.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schemas/lonic.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/loinc.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/schemas/observation.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/observation.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/schemas/patient.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/patient.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/db.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,7 +35,7 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="ProblemsViewState">
-    <option name="selectedTabId" value="ProjectErrors" />
+    <option name="selectedTabId" value="CurrentFile" />
   </component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 1
@@ -169,7 +166,7 @@
       <workItem from="1752432090460" duration="2219000" />
       <workItem from="1752440712776" duration="7873000" />
       <workItem from="1752525625698" duration="4726000" />
-      <workItem from="1752607848534" duration="4114000" />
+      <workItem from="1752607848534" duration="6813000" />
     </task>
     <task id="LOCAL-00001" summary="grafica e logica aggiornata">
       <option name="closed" value="true" />

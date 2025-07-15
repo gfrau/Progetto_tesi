@@ -1,11 +1,11 @@
 # schemas/patient.py
 
 from pydantic import BaseModel, Field
-from typing import List, Optional
+from typing import List, Optional, Literal
 
 
 class Identifier(BaseModel):
-    system: Optional[str] = None
+    system: Optional[str] = Field(None, example="http://fhir.example.org/identifiers")
     value: str = Field(..., example="RSSMRA85M01H501U")
 
 
@@ -35,4 +35,4 @@ class PatientCreate(PatientBase):
 
 class PatientRead(PatientBase):
     id: str
-    resourceType: str = Field("Patient", const=True)
+    resourceType: Literal["Patient"] = Field(default="Patient")
