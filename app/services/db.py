@@ -129,3 +129,13 @@ def save_observation_if_valid(db: Session, fhir_data: dict) -> bool:
     db.add(FhirResource(id=fhir_data.get("id"), resource_type="Observation", content=fhir_data))
     db.commit()
     return True
+
+
+def save_resource(db: Session, resource_type: str, data: dict) -> FhirResource:
+    """
+    Salva o aggiorna una risorsa FHIR nella tabella fhir_resources.
+    """
+    res = FhirResource(id=data["id"], resource_type=resource_type, content=data)
+    db.add(res)
+    db.commit()
+    return res

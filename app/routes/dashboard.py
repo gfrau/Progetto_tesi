@@ -6,7 +6,7 @@ from sqlalchemy import func
 
 from app.auth.dependencies import require_role
 from app.services.db import SessionLocal, get_db_session
-from app.models import Patient, Encounter, Observation
+from app.models import fhir_resource
 from app.utils.session_manager import get_session
 
 

@@ -5,17 +5,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="73a2d709-0896-4b80-ad05-861ea87787af" name="Changes" comment="grafica e logica aggiornata">
-      <change afterPath="$PROJECT_DIR$/app/models/fhir_resource.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/models/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/models/encounter.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/models/observation.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/models/patient.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/logs/audit.ndjson" beforeDir="false" afterPath="$PROJECT_DIR$/app/logs/audit.ndjson" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/dashboard.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/dashboard.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/routes/encounter.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/encounter.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/maintenance.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/maintenance.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/routes/observation.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/observation.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/routes/patient.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/patient.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routes/test_db.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/test_db.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/stats.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/stats.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/upload.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/upload.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schemas/encounter.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/encounter.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schemas/observation.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/observation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schemas/patient.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/patient.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/services/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/db.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -49,27 +51,27 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "DefaultHtmlFileTemplate": "HTML File",
-    "ModuleVcsDetector.initialDetectionPerformed": "true",
-    "Python.Run FastAPI .executor": "Run",
-    "Python.uvicorn.executor": "Run",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "RunOnceActivity.git.unshallow": "true",
-    "SHARE_PROJECT_CONFIGURATION_FILES": "true",
-    "git-widget-placeholder": "new-logic-db",
-    "junie.onboarding.icon.badge.shown": "true",
-    "last_opened_file_path": "/Users/gianluigi.frau/Documents/TESI/Progetto_tesi/templates",
-    "node.js.detected.package.eslint": "true",
-    "node.js.detected.package.tslint": "true",
-    "node.js.selected.package.eslint": "(autodetect)",
-    "node.js.selected.package.tslint": "(autodetect)",
-    "nodejs_package_manager_path": "npm",
-    "settings.editor.selected.configurable": "com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable",
-    "vue.rearranger.settings.migration": "true"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;DefaultHtmlFileTemplate&quot;: &quot;HTML File&quot;,
+    &quot;ModuleVcsDetector.initialDetectionPerformed&quot;: &quot;true&quot;,
+    &quot;Python.Run FastAPI .executor&quot;: &quot;Run&quot;,
+    &quot;Python.uvicorn.executor&quot;: &quot;Run&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
+    &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;new-logic-db&quot;,
+    &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/gianluigi.frau/Documents/TESI/Progetto_tesi/templates&quot;,
+    &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
+    &quot;node.js.detected.package.tslint&quot;: &quot;true&quot;,
+    &quot;node.js.selected.package.eslint&quot;: &quot;(autodetect)&quot;,
+    &quot;node.js.selected.package.tslint&quot;: &quot;(autodetect)&quot;,
+    &quot;nodejs_package_manager_path&quot;: &quot;npm&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable&quot;,
+    &quot;vue.rearranger.settings.migration&quot;: &quot;true&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/templates" />
@@ -167,6 +169,7 @@
       <workItem from="1752432090460" duration="2219000" />
       <workItem from="1752440712776" duration="7873000" />
       <workItem from="1752525625698" duration="4726000" />
+      <workItem from="1752607848534" duration="4114000" />
     </task>
     <task id="LOCAL-00001" summary="grafica e logica aggiornata">
       <option name="closed" value="true" />

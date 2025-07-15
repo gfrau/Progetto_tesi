@@ -7,7 +7,7 @@ from app.services.db import get_db_session
 from app.utils.audit import log_audit_event
 from app.models.fhir_resource import FhirResource
 
-router = APIRouter(prefix="/observations", tags=["observations"])
+router = APIRouter(prefix="/observations", tags=["Observations"])
 
 @router.get("/", response_model=list[dict])
 def list_observations(

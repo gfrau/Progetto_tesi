@@ -1,20 +1,17 @@
-
 import csv
 import io
 import json
 
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
+from sqlalchemy.orm import Session
+from sqlalchemy.exc import IntegrityError
 
-from app.models.encounter import Encounter
-from app.models.observation import Observation
-from app.models.patient import Patient
-from app.services.db import *
+from app.services.db import get_db_session, save_resource
 from app.utils.mapping import csv_to_patient, csv_to_encounter, csv_to_observation, map_json_to_fhir_resource
 from app.auth.dependencies import require_role
-
+from app.models.fhir_resource import FhirResource
 
 router = APIRouter(tags=["Upload CSV/JSON"])
-
 
 # Headers attesi per l'upload CSV
 EXPECTED_HEADERS = {
@@ -29,7 +26,6 @@ def validate_csv_headers(headers: list[str], resource_type: str) -> bool:
     headers_lower = set(h.strip().lower() for h in headers)
     expected = set(h.lower() for h in EXPECTED_HEADERS[resource_type])
     return expected.issubset(headers_lower)
-
 
 # --- Upload CSV endpoints ---
 @router.post("/upload/patient/csv")
@@ -46,10 +42,15 @@ def upload_patient_csv(
     for row in reader:
         try:
             fhir_data = csv_to_patient(row)
-            success, _ = save_or_deduplicate_patient(db, fhir_data)
-            if success:
+            # Assicurati che fhir_data includa 'id'
+            if not fhir_data.get("id"):
+                identifier = fhir_data.get("identifier", [{}])[0].get("value")
+                fhir_data["id"] = identifier
+            try:
+                save_resource(db, "Patient", fhir_data)
                 inserted += 1
-            else:
+            except IntegrityError:
+                db.rollback()
                 skipped += 1
         except Exception:
             skipped += 1
@@ -61,9 +62,7 @@ def upload_encounter_csv(
     db: Session = Depends(get_db_session),
     _: None = Depends(require_role("admin"))
 ):
-    contents = file.file.read().decode("utf-8")
-    reader = csv.DictReader(io.StringIO(contents))
-
+    reader = csv.DictReader(io.StringIO(file.file.read().decode("utf-8")))
     if not validate_csv_headers(reader.fieldnames, "Encounter"):
         raise HTTPException(status_code=400, detail="Le intestazioni del file CSV non corrispondono alla risorsa Encounter.")
 
@@ -71,29 +70,22 @@ def upload_encounter_csv(
     for row in reader:
         try:
             fhir_data = csv_to_encounter(row)
-
-            # Estrai l'identificatore anonimo dal campo corretto
-            patient_identifier = fhir_data.get("subject", {}).get("identifier", {}).get("value", "")
-
-            if not db.query(Patient).filter(Patient.identifier == patient_identifier).first():
-                print(f"[SCARTATO] Paziente non trovato: hash = {patient_identifier}")
+            patient_id = fhir_data.get("subject", {}).get("identifier", {}).get("value", "")
+            exists = db.query(FhirResource).filter_by(resource_type="Patient").filter(FhirResource.content["identifier"][0]["value"].astext == patient_id).first()
+            if not exists:
                 skipped += 1
                 continue
-
-            identifier = fhir_data.get("identifier", [{}])[0].get("value")
-            if db.query(Encounter).filter_by(identifier=identifier).first():
-                print(f"[SCARTATO] Encounter duplicato: {identifier}")
+            # Ensure id present
+            if not fhir_data.get("id"):
+                fhir_data["id"] = fhir_data.get("identifier", [{}])[0].get("value")
+            try:
+                save_resource(db, "Encounter", fhir_data)
+                inserted += 1
+            except IntegrityError:
+                db.rollback()
                 skipped += 1
-                continue
-
-            db.add(Encounter(identifier=identifier, fhir_data=fhir_data))
-            inserted += 1
-
-        except Exception as e:
-            print(f"[SCARTATO] Errore nella riga: {row} -> {e}")
+        except Exception:
             skipped += 1
-
-    db.commit()
     return {"inserted": inserted, "skipped": skipped}
 
 @router.post("/upload/observation/csv")
@@ -102,42 +94,33 @@ def upload_observation_csv(
     db: Session = Depends(get_db_session),
     _: None = Depends(require_role("admin"))
 ):
-    contents = file.file.read().decode("utf-8")
-    reader = csv.DictReader(io.StringIO(contents))
-
+    reader = csv.DictReader(io.StringIO(file.file.read().decode("utf-8")))
     if not validate_csv_headers(reader.fieldnames, "Observation"):
         raise HTTPException(status_code=400, detail="Le intestazioni del file CSV non corrispondono alla risorsa Observation.")
 
     inserted, skipped, errors = 0, 0, []
-
     for row in reader:
         try:
             fhir_data = csv_to_observation(row)
-
-            # Verifico se esiste il paziente nel DB
-            codice_fiscale = fhir_data.get("subject", {}).get("identifier", {}).get("value")
-            paziente = db.query(Patient).filter(Patient.identifier == codice_fiscale).first()
-            if not paziente:
-                errors.append(f"Observation scartata: paziente {codice_fiscale} non trovato.")
+            codice = fhir_data.get("subject", {}).get("identifier", {}).get("value", "")
+            exists = db.query(FhirResource).filter_by(resource_type="Patient").filter(FhirResource.content["identifier"][0]["value"].astext == codice).first()
+            if not exists:
+                errors.append(f"Paziente non trovato: {codice}")
                 skipped += 1
                 continue
-
-            # Verifico duplicato
-            identifier = fhir_data.get("identifier", [{}])[0].get("value")
-            if db.query(Observation).filter_by(identifier=identifier).first():
-                errors.append(f"Observation duplicata: {identifier}")
+            if not fhir_data.get("id"):
+                fhir_data["id"] = fhir_data.get("identifier", [{}])[0].get("value")
+            try:
+                save_resource(db, "Observation", fhir_data)
+                inserted += 1
+            except IntegrityError:
+                db.rollback()
+                errors.append(f"Duplicato: {fhir_data.get('identifier',[{}])[0].get('value')}")
                 skipped += 1
-                continue
-
-            db.add(Observation(identifier=identifier, fhir_data=fhir_data))
-            inserted += 1
         except Exception as e:
             skipped += 1
-            errors.append(f"Errore riga: {str(e)}")
-
-    db.commit()
+            errors.append(str(e))
     return {"inserted": inserted, "skipped": skipped, "errors": errors}
-
 
 # --- Upload JSON mixed endpoint ---
 @router.post("/upload/json/bulk")
@@ -148,47 +131,28 @@ def upload_json_bulk(
 ):
     try:
         file.file.seek(0)
-        contents = file.file.read().decode("utf-8")
-        print("[DEBUG] Contenuto JSON ricevuto:")
-        print(contents)
-        data = json.loads(contents)
-    except Exception as e:
-        print(f"[ERRORE] durante il parsing JSON: {str(e)}")
-        raise HTTPException(status_code=400, detail="Il file JSON non è valido.")
-
+        data = json.loads(file.file.read().decode("utf-8"))
+    except Exception:
+        raise HTTPException(status_code=400, detail="JSON non valido.")
     if not isinstance(data, list):
-        raise HTTPException(status_code=400, detail="JSON non valido: ci si aspetta un array di oggetti.")
+        raise HTTPException(status_code=400, detail="Ci si aspetta un array di oggetti FHIR.")
 
     inserted, skipped, errors = 0, 0, []
-
     for entry in data:
         try:
             resource_type, fhir_data = map_json_to_fhir_resource(entry)
-
-            print(f"[DEBUG] Resource type: {resource_type}")
-            print(f"[DEBUG] FHIR data: {fhir_data}")
-
-            if resource_type == "Patient":
-                success, _ = save_or_deduplicate_patient(db, fhir_data)
-            elif resource_type == "Encounter":
-                success = save_encounter_if_valid(db, fhir_data)
-            elif resource_type == "Observation":
-                success = save_observation_if_valid(db, fhir_data)
-            else:
-                raise ValueError("Tipo di risorsa non supportato.")
-
-            if success:
+            if not fhir_data.get("id") and resource_type in ("Patient", "Encounter", "Observation"):
+                fhir_data["id"] = fhir_data.get("identifier", [{}])[0].get("value")
+            try:
+                save_resource(db, resource_type, fhir_data)
                 inserted += 1
-            else:
-                raise ValueError("risorsa duplicata o referenza non valida")
-
+            except IntegrityError:
+                db.rollback()
+                skipped += 1
         except Exception as e:
             skipped += 1
             identifier = entry.get("identifier", [{}])[0].get("value", "sconosciuto")
             resource_type = entry.get("resourceType", "Unknown")
             error_msg = f"{resource_type} {identifier}: {str(e)}"
-            print(f"[ERRORE] {error_msg}")
             errors.append(error_msg)
-
-
     return {"inserted": inserted, "skipped": skipped, "errors": errors}

@@ -1,67 +1,101 @@
-from fastapi import APIRouter, Depends
+import datetime
+from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
+
 from app.services.db import get_db_session
-from app.models import Patient, Encounter, Observation
+from app.models.fhir_resource import FhirResource
 from app.utils.mapping import is_valid_loinc_code
 
 router = APIRouter(tags=["test"])
 
 @router.get("/duplicates")
 def test_duplicates(db: Session = Depends(get_db_session)):
-    result = (
-        db.query(Patient.identifier)
-        .group_by(Patient.identifier)
-        .having(func.count(Patient.identifier) > 1)
-        .all()
+    """
+    Ritorna gli identifier duplicati tra i pazienti.
+    """
+    identifier_expr = FhirResource.content["identifier"][0]["value"].astext
+    rows = (
+        db.query(identifier_expr)
+          .filter_by(resource_type="Patient")
+          .group_by(identifier_expr)
+          .having(func.count(identifier_expr) > 1)
+          .all()
     )
-    return {"count": len(result), "duplicates": result}
-
+    # rows è lista di tuple [(identifier,), ...]
+    duplicates = [r[0] for r in rows]
+    return {"count": len(duplicates), "duplicates": duplicates}
 
 @router.get("/encounter-links")
 def test_encounter_links(db: Session = Depends(get_db_session)):
-    from app.models.patient import Patient
-
-    encounters = db.query(Encounter).all()
-    patients = db.query(Patient.identifier).all()
-    patient_ids = {p.identifier for p in patients}
+    """
+    Controlla che ogni encounter riferisca a un Patient esistente.
+    """
+    # Prendi tutti gli encounter
+    encounter_rows = (
+        db.query(FhirResource)
+          .filter_by(resource_type="Encounter")
+          .all()
+    )
+    # Prendi tutti gli identifier dei pazienti
+    patient_expr = FhirResource.content["identifier"][0]["value"].astext
+    patient_rows = (
+        db.query(patient_expr)
+          .filter_by(resource_type="Patient")
+          .all()
+    )
+    patient_ids = {r[0] for r in patient_rows}
 
     broken = []
-
-    for e in encounters:
-        subject = e.fhir_data.get("subject", {})
+    for row in encounter_rows:
+        subject = row.content.get("subject", {})
         patient_id = None
-
         if "reference" in subject:
-            patient_id = subject["reference"].replace("Patient/", "")
+            patient_id = subject.get("reference", "").replace("Patient/", "")
         elif "identifier" in subject:
-            patient_id = subject["identifier"].get("value")
-
+            patient_id = subject.get("identifier", {}).get("value")
         if not patient_id or patient_id not in patient_ids:
-            broken.append(e.identifier)
+            # identifier of the encounter
+            enc_id = row.content.get("identifier", [{}])[0].get("value")
+            broken.append(enc_id)
 
     return {"broken_count": len(broken), "broken_links": broken}
 
-
 @router.get("/observation-links")
 def test_observation_links(db: Session = Depends(get_db_session)):
-    observations = db.query(Observation).all()
-
-    if not observations:
+    """
+    Verifica che ogni observation abbia subject.identifier valorizzato.
+    """
+    obs_rows = (
+        db.query(FhirResource)
+          .filter_by(resource_type="Observation")
+          .all()
+    )
+    if not obs_rows:
         return {"status": "empty", "message": "Nessuna risorsa Observation presente."}
 
-    broken = [
-        obs.identifier for obs in observations
-        if not obs.fhir_data.get("subject", {}).get("identifier", {}).get("value")
-    ]
-    return {"status": "ok", "broken_count": len(broken), "broken_links": broken}
+    broken = []
+    for row in obs_rows:
+        if not row.content.get("subject", {}).get("identifier", {}).get("value"):
+            obs_id = row.content.get("identifier", [{}])[0].get("value")
+            broken.append(obs_id)
 
+    return {"status": "ok", "broken_count": len(broken), "broken_links": broken}
 
 @router.get("/observation-loinc")
 def test_observation_loinc(db: Session = Depends(get_db_session)):
+    """
+    Controlla che ogni observation abbia un codice LOINC valido.
+    """
     invalid = []
-    for obs in db.query(Observation).all():
-        code = obs.fhir_data.get("code", {}).get("coding", [{}])[0].get("code")
+    obs_rows = (
+        db.query(FhirResource)
+          .filter_by(resource_type="Observation")
+          .all()
+    )
+    for row in obs_rows:
+        code = row.content.get("code", {}).get("coding", [{}])[0].get("code")
         if not is_valid_loinc_code(code):
-            invalid.append({"id": obs.identifier, "code": code})
+            obs_id = row.content.get("identifier", [{}])[0].get("value")
+            invalid.append({"id": obs_id, "code": code})
     return {"invalid_count": len(invalid), "invalid_codes": invalid}

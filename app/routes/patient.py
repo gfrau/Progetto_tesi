@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.models.fhir_resource import FhirResource
 from app.services.db import get_db_session
 
-router = APIRouter(prefix="/patients", tags=["patients"])
+router = APIRouter(prefix="/patients", tags=["Patients"])
 
 @router.get("/", response_model=list[dict])
 def list_patients(db: Session = Depends(get_db_session)):
