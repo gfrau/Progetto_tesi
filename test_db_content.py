@@ -1,6 +1,6 @@
 # test_db_content.py
 
-from app.services.db import SessionLocal
+from app.services.database import SessionLocal
 from app.models import Patient, Encounter, Observation
 
 

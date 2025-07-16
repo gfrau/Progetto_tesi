@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 from app.auth.dependencies import require_role
-from app.services.db import SessionLocal, get_db_session
+from app.services.database import SessionLocal, get_db_session
 from app.models import fhir_resource
 from app.utils.session_manager import get_session
 

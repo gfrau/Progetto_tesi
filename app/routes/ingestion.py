@@ -6,8 +6,8 @@ from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import IntegrityError
 
-from app.services.db import get_db_session, save_resource
-from app.utils.mapping import csv_to_patient, csv_to_encounter, csv_to_observation, map_json_to_fhir_resource
+from app.services.database import get_db_session, save_resource
+from app.utils.transform import csv_to_patient, csv_to_encounter, csv_to_observation, map_json_to_fhir_resource
 from app.auth.dependencies import require_role
 from app.models.fhir_resource import FhirResource
 

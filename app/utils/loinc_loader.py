@@ -1,6 +1,6 @@
-from app.services.db import SessionLocal
+from app.services.database import SessionLocal
 from app.models.loinc import LOINCCodes
-from app.utils.default_loinc_codes import loinc_data
+from app.utils.mapping_tables import loinc_data
 
 def populate_loinc_codes():
     db = SessionLocal()

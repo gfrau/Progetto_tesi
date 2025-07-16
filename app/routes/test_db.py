@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
-from app.services.db import get_db_session, reset_database
+from app.services.database import get_db_session, reset_database
 from app.models.fhir_resource import FhirResource
 
 router = APIRouter(prefix="/test-db", tags=["test-db"])

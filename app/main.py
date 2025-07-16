@@ -14,7 +14,7 @@ from app.utils.loinc_loader import populate_loinc_codes
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.staticfiles import StaticFiles
 from app.base import Base
-from app.services.db import engine
+from app.services.database import engine
 
 from app.routes import (
     patient,
@@ -28,7 +28,7 @@ from app.routes import (
     stats,
     frontend,
     template,
-    upload,
+    ingestion,
     test,
 )
 
@@ -57,20 +57,21 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 templates = Jinja2Templates(directory="templates")
 
 # Includo i router
+app.include_router(auth.router, tags=["Auth"])
+
+app.include_router(frontend.router, dependencies=[Depends(require_role("viewer"))])
+app.include_router(dashboard.router, dependencies=[Depends(require_role("viewer"))])
+app.include_router(template.router, dependencies=[Depends(require_role("viewer"))])
+
 app.include_router(patient.router, prefix="/api")
 app.include_router(encounter.router, prefix="/api")
 app.include_router(observation.router, prefix="/api")
-app.include_router(upload.router, prefix="/api")
+app.include_router(ingestion.router, prefix="/api")
 app.include_router(loinc.router, prefix="/api")
 app.include_router(maintenance.router, prefix="/api")
 app.include_router(test_db.router, prefix="/api")
 app.include_router(stats.router, prefix="/api")
 app.include_router(test.router, prefix="/api/test")
-
-app.include_router(frontend.router)
-app.include_router(auth.router)
-app.include_router(dashboard.router)
-app.include_router(template.router)
 
 @app.get("/", response_class=HTMLResponse)
 def read_root(request: Request):

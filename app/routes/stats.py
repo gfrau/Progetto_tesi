@@ -3,7 +3,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from fastapi.responses import JSONResponse
 
-from app.services.db import get_db_session
+from app.services.database import get_db_session
 from app.models.fhir_resource import FhirResource
 
 router = APIRouter()

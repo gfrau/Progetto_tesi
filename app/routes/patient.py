@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 
 from app.auth.dependencies import require_role
 from app.utils.audit import log_audit_event
-from app.services.db import get_db_session
+from app.services.database import get_db_session
 from app.models.fhir_resource import FhirResource
 from app.schemas import PatientCreate, PatientRead
 
