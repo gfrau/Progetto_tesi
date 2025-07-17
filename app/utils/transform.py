@@ -1,271 +1,147 @@
-import hashlib
-from app.utils.loinc import is_valid_loinc_code
+# app/utils/transform.py
+
+import io, csv
+from fhir.resources.patient import Patient
+from fhir.resources.encounter import Encounter as FhirEncounter
+from fhir.resources.observation import Observation as FhirObservation
+from sqlalchemy import text
+from app.schemas import EncounterCreate
+from app.services.database import engine
 
 
 
-def is_valid_loinc_code(code: str) -> bool:
-    """
-    Valida un codice LOINC nel formato '1234-5'.
-    - Deve contenere un trattino.
-    - Entrambe le parti devono essere numeriche.
-    """
-    if not isinstance(code, str):
+# Headers attesi per l'upload CSV
+EXPECTED_HEADERS = {
+    "Encounter": {"encounter_id", "codice_fiscale", "status", "class", "data_inizio", "data_fine"},
+    "Patient": {"nome", "cognome", "codice_fiscale", "data_nascita", "telefono", "indirizzo", "cap", "citta", "gender"},
+    "Observation": {"observation_id","codice_fiscale","codice_loinc","descrizione_test","valore","unita","data_osservazione"}
+}
+
+def validate_csv_headers(headers: list[str], resource_type: str) -> bool:
+    if not headers or resource_type not in EXPECTED_HEADERS:
         return False
-    code = code.strip()
-    if "-" not in code:
-        return False
-    parts = code.split("-")
-    return (
-        len(parts) == 2 and
-        all(part.isdigit() for part in parts) and
-        len(parts[1]) > 0  # la seconda parte non deve essere vuota
-    )
-
-
-def map_csv_to_fhir_resource(row: dict) -> tuple[str, dict]:
-    """
-    Mappa una riga CSV a una risorsa FHIR Patient, Encounter o Observation.
-    Ritorna una tupla (resourceType, fhir_dict)
-    """
-    def hash_identifier(value: str) -> str:
-        return f"anon-{hashlib.sha256(value.encode()).hexdigest()[:8]}"
-
-    row = {k.strip().lower(): v.strip() for k, v in row.items() if v.strip()}
-
-    # Mappatura Patient
-    if "codice_fiscale" in row and "nome" in row and "cognome" in row:
-        codice_fiscale = row.get("codice_fiscale")
-        birth_date = row.get("data_nascita")
-        gender = row.get("sesso", "").lower()
-
-        resource = {
-            "resourceType": "Patient",
-            "identifier": [{"value": hash_identifier(codice_fiscale)}] if codice_fiscale else [],
-            "birthDate": birth_date,
-            "gender": gender if gender in ["male", "female", "other", "unknown"] else "unknown",
-            "name": [{
-                "family": row.get("cognome"),
-                "given": [row.get("nome")]
-            }]
-        }
-        return "Patient", resource
-
-    # Mappatura Encounter
-    if "encounter_id" in row and "codice_fiscale" in row:
-        resource = {
-            "resourceType": "Encounter",
-            "identifier": [{"value": row.get("encounter_id")}],
-            "status": row.get("status", "finished"),
-            "class": {"code": row.get("class", "AMB")},
-            "subject": {
-                "identifier": {
-                    "value": hash_identifier(row.get("codice_fiscale"))
-                }
-            },
-            "period": {
-                "start": row.get("data_inizio"),
-                "end": row.get("data_fine")
-            }
-        }
-        return "Encounter", resource
-
-    # Mappatura Observation
-    if "observation_id" in row and "codice_fiscale" in row:
-        code = row.get("codice_test")
-        value = row.get("valore")
-        unit = row.get("unita_misura", "1")
-        resource = {
-            "resourceType": "Observation",
-            "identifier": [{"value": row.get("observation_id")}],
-            "status": row.get("status", "final"),
-            "code": {
-                "coding": [{
-                    "system": "http://loinc.org",
-                    "code": code,
-                    "display": row.get("descrizione_test", "")
-                }]
-            },
-            "subject": {
-                "identifier": {
-                    "value": hash_identifier(row.get("codice_fiscale"))
-                }
-            },
-            "effectiveDateTime": row.get("data_osservazione"),
-            "valueQuantity": {
-                "value": float(value) if value.replace('.', '', 1).isdigit() else None,
-                "unit": unit
-            }
-        }
-
-        if not is_valid_loinc_code(code):
-            raise ValueError(f"Codice LOINC non valido: {code}")
-
-        return "Observation", resource
-
-    raise ValueError("Tipo di risorsa non riconosciuto o campi insufficienti")
-
-
-from app.utils.anonymization import anonymize_patient
+    headers_lower = set(h.strip().lower() for h in headers)
+    expected = set(h.lower() for h in EXPECTED_HEADERS[resource_type])
+    return expected.issubset(headers_lower)
 
 
 def csv_to_patient(row: dict) -> dict:
     """
-    Converte una riga CSV in una risorsa FHIR Patient anonima.
+    Trasforma una riga CSV in un dict FHIR.Patient valido.
     """
-    codice_fiscale = row.get("codice_fiscale", "").strip()
-
-    if not codice_fiscale:
-        raise ValueError("Codice fiscale mancante")
-
-    # Normalizzazione del campo gender
-    raw_gender = row.get("gender", "").strip().lower()
-    gender_map = {
-        "m": "male",
-        "f": "female",
-        "maschio": "male",
-        "femmina": "female"
-    }
-    gender = gender_map.get(raw_gender, raw_gender if raw_gender in ["male", "female", "other", "unknown"] else "unknown")
-
-    fhir_patient = {
+    fhir_dict = {
         "resourceType": "Patient",
+        "id": row.get("codice_fiscale"),
         "identifier": [{
-            "system": "urn:oid:2.16.840.1.113883.2.9.4.3.2",  # ✅ Codice fiscale (Agenzia delle Entrate)
-            "value": codice_fiscale
+            "value": row.get("codice_fiscale"),
+            "system": "http://fhir.example.org"
         }],
-        "birthDate": row.get("data_nascita", "").strip(),
-        "gender": gender,
         "name": [{
-            "given": [row.get("nome", "").strip()],
-            "family": row.get("cognome", "").strip()
+            "family": row.get("cognome"),
+            "given": [row.get("nome")]
         }],
+        "gender": row.get("gender"),
+        "birthDate": row.get("data_nascita"),
         "telecom": [{
             "system": "phone",
-            "value": row.get("telefono", "").strip()
+            "value": row.get("telefono")
         }],
         "address": [{
-            "line": [row.get("indirizzo", "").strip()],
-            "city": row.get("citta", "").strip(),
-            "postalCode": row.get("cap", "").strip()
+            "city":       row.get("citta"),
+            "district":   row.get("provincia"),
+            "postalCode": row.get("cap")
         }]
     }
-
-    return anonymize_patient(fhir_patient)
+    patient = Patient.parse_obj(fhir_dict)
+    return patient.model_dump(mode="json")
 
 
 def csv_to_encounter(row: dict) -> dict:
     """
-    Converte una riga CSV in una risorsa FHIR Encounter.
-    Richiede: encounter_id, codice_fiscale, status, class, data_inizio, data_fine
+    Trasforma una riga CSV in un dict FHIR.Encounter valido.
     """
-    codice_fiscale = row.get("codice_fiscale", "").strip()
-    encounter_id = row.get("encounter_id", "").strip()
-    status = row.get("status", "finished").strip().lower()
-    encounter_class = row.get("class", "AMB").strip().upper()
-    start_date = row.get("data_inizio", "").strip()
-    end_date = row.get("data_fine", "").strip()
-
-    if not codice_fiscale:
-        raise ValueError("Codice fiscale mancante nella riga Encounter")
-    if not encounter_id:
-        raise ValueError("ID encounter mancante")
-
-    # Calcolo dell’hash del codice fiscale per collegare al Patient
-    patient_identifier_hash = hashlib.sha256(codice_fiscale.encode("utf-8")).hexdigest()
-    print(f"[DEBUG] Codice fiscale: {codice_fiscale} -> Hash: {patient_identifier_hash}")
-
-    fhir_encounter = {
+    raw = {
         "resourceType": "Encounter",
-        "identifier": [{
-            "value": encounter_id
-        }],
-        "status": status,
+        "id":            row.get("encounter_id"),
+        "status":        row.get("status"),
         "class": {
-            "code": encounter_class
-        },
-        "period": {
-            "start": start_date,
-            "end": end_date
+            "coding": [{
+                "system":  "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+                "code":    row.get("class"),
+                "display": row.get("class")
+            }]
         },
         "subject": {
-            "identifier": {
-                "value": patient_identifier_hash
-            }
+            "identifier": {"value": row.get("codice_fiscale")}
+        },
+        "period": {
+            "start": row.get("data_inizio"),
+            "end":   row.get("data_fine")
         }
     }
+    # se preferisci usare il tuo schema Pydantic:
+    # enc_model = EncounterCreate.parse_obj(raw)
+    # return enc_model.model_dump(mode="json")
 
-    return fhir_encounter
-
+    enc = FhirEncounter.parse_obj(raw)
+    return enc.model_dump(mode="json")
 
 
 def csv_to_observation(row: dict) -> dict:
     """
-    Converte una riga CSV in una risorsa FHIR Observation.
-    Richiede: observation_id, codice_fiscale, codice_lonic, descrizione_test, valore, unita, data_osservazione
+    Trasforma una riga CSV in un dict FHIR.Observation valido.
     """
-    codice = row.get("codice_lonic", "").strip()
-    valore = row.get("valore", "").strip()
-    unita = row.get("unita", "").strip()
-    codice_fiscale = row.get("codice_fiscale", "").strip()
-    descrizione = row.get("descrizione_test", "").strip()
-    data = row.get("data_osservazione", "").strip()
-    observation_id = row.get("observation_id", "").strip()
-
-    if not observation_id or not codice_fiscale or not codice or not valore:
-        raise ValueError("Dati insufficienti: observation_id, codice_fiscale, codice_lonic e valore sono obbligatori")
-
-    if not is_valid_loinc_code(codice):
-        print(f"[ERRORE] Codice LOINC non valido → '{codice}'")
-        raise ValueError(f"Codice LOINC non valido: {codice}")
-
-    try:
-        valore_float = float(valore)
-    except ValueError:
-        raise ValueError(f"Valore non numerico: '{valore}'")
-
-    codice_fiscale = hashlib.sha256(codice_fiscale.encode("utf-8")).hexdigest()
-    return {
-        "resourceType": "Observation",
-        "identifier": [{"value": observation_id}],
-        "status": "final",
-        "subject": {"identifier": {"value": codice_fiscale}},
+    # supporto sia 'codice_lonic' che 'codice_loinc'
+    loinc_code = row.get("codice_lonic") or row.get("codice_loinc") or ""
+    fhir_dict = {
+        "resourceType":      "Observation",
+        "id":                row.get("observation_id"),
+        "status":            "final",
         "code": {
             "coding": [{
-                "system": "http://loinc.org",
-                "code": codice,
-                "display": descrizione
-            }],
-            "text": descrizione
+                "system":  "http://loinc.org",
+                "code":    loinc_code,
+                "display": row.get("descrizione_test")
+            }]
         },
-        "effectiveDateTime": data,
+        "subject": {
+            "identifier": {"value": row.get("codice_fiscale")}
+        },
+        "effectiveDateTime": row.get("data_osservazione"),
         "valueQuantity": {
-            "value": valore_float,
-            "unit": unita
+            "value": float(row.get("valore", 0)),
+            "unit":  row.get("unita")
         }
     }
 
 
-def validate_csv_headers(headers: list[str], resource_type: str) -> bool:
+    obs = FhirObservation.parse_obj(fhir_dict)
+    return obs.model_dump(mode="json")
+
+
+def map_json_to_fhir_resource(entry: dict) -> tuple[str, dict]:
     """
-    Verifica se le intestazioni CSV corrispondono a quelle attese per il tipo di risorsa.
+    Determina il tipo di risorsa FHIR e la valida tramite fhir.resources.
     """
-    expected_headers = {
-        "Patient": {"nome", "cognome", "codice_fiscale", "data_nascita", "telefono", "indirizzo", "cap", "citta","gender"},
-        "Encounter": {"encounter_id", "codice_fiscale", "status", "class", "data_inizio", "data_fine"},
-        "Observation": {"observation_id", "codice_fiscale", "codice_lonic", "descrizione_test", "valore", "unita","data_osservazione"}
-    }
-
-    normalized_headers = {h.strip().lower() for h in headers}
-    expected = expected_headers.get(resource_type)
-
-    if not expected:
-        return False  # Tipo non supportato
-
-    return expected.issubset(normalized_headers)
+    rt = entry.get("resourceType")
+    if rt == "Patient":
+        model = Patient.parse_obj(entry)
+    elif rt == "Encounter":
+        model = FhirEncounter.parse_obj(entry)
+    elif rt == "Observation":
+        model = FhirObservation.parse_obj(entry)
+    else:
+        raise ValueError(f"Tipo di risorsa non supportato: {rt}")
+    return rt, model.model_dump(mode="json")
 
 
-def map_json_to_fhir_resource(data: dict) -> tuple[str, dict]:
-    resource_type = data.get("resourceType")
-    if resource_type not in {"Patient", "Encounter", "Observation"}:
-        raise ValueError("Tipo di risorsa non supportato")
-    return resource_type, data
+def is_valid_loinc_code(code: str) -> bool:
+    """
+    Verifica se un codice LOINC esiste nella tabella loinc_codes.
+    """
+    with engine.connect() as conn:
+        row = conn.execute(
+            text("SELECT 1 FROM loinc_codes WHERE code = :code"),
+            {"code": code}
+        ).first()
+    return row is not None

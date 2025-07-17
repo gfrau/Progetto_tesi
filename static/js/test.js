@@ -198,15 +198,14 @@ function renderTable(data) {
   const headersByType = {
     "Patient": [
       "resourceType", "identifier.0.value", "name.0.family", "name.0.given.0",
-      "birthDate", "gender", "address.0.line.0", "address.0.city",
-      "address.0.state", "address.0.postalCode"
+      "birthDate", "gender", "address.0.city", "address.0.district", "address.0.postalCode"
     ],
     "Encounter": [
-      "resourceType", "identifier.0.value", "status", "class.code",
+      "resourceType", "id", "status", "class.coding.0.code",
       "period.start", "period.end", "subject.identifier.value"
     ],
     "Observation": [
-      "resourceType", "identifier.0.value", "code.coding.0.display", "code.coding.0.code",
+      "resourceType", "id", "code.coding.0.display", "code.coding.0.code",
       "valueQuantity.value", "valueQuantity.unit", "effectiveDateTime", "subject.identifier.value"
     ]
 };

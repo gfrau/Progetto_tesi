@@ -50,10 +50,14 @@ def test_encounter_links(db: Session = Depends(get_db_session)):
     for row in encounter_rows:
         subject = row.content.get("subject", {})
         patient_id = None
-        if "reference" in subject:
-            patient_id = subject.get("reference", "").replace("Patient/", "")
-        elif "identifier" in subject:
-            patient_id = subject.get("identifier", {}).get("value")
+        # estraiamo il reference o usiamo stringa vuota se è None
+        ref = subject.get("reference") or ""
+        if ref:
+            patient_id = ref.replace("Patient/", "")
+        else:
+            # fallback su identifier.value
+            patient_id = subject.get("identifier", {}).get("value", "")
+
         if not patient_id or patient_id not in patient_ids:
             # identifier of the encounter
             enc_id = row.content.get("identifier", [{}])[0].get("value")

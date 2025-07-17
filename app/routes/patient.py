@@ -7,7 +7,7 @@ from app.services.database import get_db_session
 from app.models.fhir_resource import FhirResource
 from app.schemas import PatientCreate, PatientRead
 
-router = APIRouter(prefix="/patients", tags=["patients"])
+router = APIRouter(prefix="/patients", tags=["Patients"])
 
 @router.get("/", response_model=list[PatientRead])
 def list_patients(

@@ -7,21 +7,17 @@
     <list default="true" id="73a2d709-0896-4b80-ad05-861ea87787af" name="Changes" comment="grafica e logica aggiornata">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/logs/audit.ndjson" beforeDir="false" afterPath="$PROJECT_DIR$/app/logs/audit.ndjson" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routes/dashboard.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/dashboard.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/routes/encounter.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/encounter.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routes/loinc.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/loinc.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/ingestion.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/ingestion.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/routes/observation.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/observation.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/routes/patient.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/patient.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routes/stats.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/stats.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/routes/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/test.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routes/test_db.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/test_db.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routes/upload.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/ingestion.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/db.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/database.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/utils/default_loinc_codes.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/utils/mapping_tables.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/utils/loinc_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/utils/loinc_loader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/utils/mapping.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/utils/transform.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_db_content.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_db_content.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schemas/patient.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/patient.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/utils/anonymization.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/utils/anonymization.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/utils/transform.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/utils/transform.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/js/test.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/test.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/test.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/test.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/test_data_view.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/test_data_view.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -63,7 +59,7 @@
     &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
     &quot;RunOnceActivity.git.unshallow&quot;: &quot;true&quot;,
     &quot;SHARE_PROJECT_CONFIGURATION_FILES&quot;: &quot;true&quot;,
-    &quot;git-widget-placeholder&quot;: &quot;new-logic-db&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;fix-pydantic&quot;,
     &quot;junie.onboarding.icon.badge.shown&quot;: &quot;true&quot;,
     &quot;last_opened_file_path&quot;: &quot;/Users/gianluigi.frau/Documents/TESI/Progetto_tesi/templates&quot;,
     &quot;node.js.detected.package.eslint&quot;: &quot;true&quot;,
@@ -174,6 +170,7 @@
       <workItem from="1752525625698" duration="4726000" />
       <workItem from="1752607848534" duration="7230000" />
       <workItem from="1752679711477" duration="3181000" />
+      <workItem from="1752776136803" duration="6747000" />
     </task>
     <task id="LOCAL-00001" summary="grafica e logica aggiornata">
       <option name="closed" value="true" />

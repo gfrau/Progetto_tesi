@@ -7,7 +7,7 @@ from app.services.database import get_db_session
 from app.models.fhir_resource import FhirResource
 from app.schemas import EncounterCreate, EncounterRead
 
-router = APIRouter(prefix="/encounters", tags=["encounters"])
+router = APIRouter(prefix="/encounters", tags=["Encounters"])
 
 @router.get("/", response_model=list[EncounterRead])
 def list_encounters(

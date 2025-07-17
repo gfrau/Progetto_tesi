@@ -6,11 +6,17 @@
   <div class="mb-5">
     <h5>Patient</h5>
     <table class="table table-sm table-bordered">
-      <thead>
+      <thead class="table-light">
         <tr>
-          <th>Identifier</th>
-          <th>Gender</th>
-          <th>Birth Date</th>
+          <th scope="col">Risorsa</th>
+          <th scope="col">ID Risorsa</th>
+          <th scope="col">Cognome</th>
+          <th scope="col">Nome</th>
+          <th scope="col">Data di Nascita</th>
+          <th scope="col">Sesso</th>
+          <th scope="col">Città</th>
+          <th scope="col">Provincia</th>
+          <th scope="col">CAP</th>
         </tr>
       </thead>
       <tbody id="patient-data"></tbody>
@@ -22,7 +28,9 @@
     <table class="table table-sm table-bordered">
       <thead>
         <tr>
+          <th>ID Risorsa</th>
           <th>Identifier</th>
+          <th>Classe</th>
           <th>Patient</th>
           <th>Start</th>
           <th>End</th>
@@ -37,10 +45,13 @@
     <table class="table table-sm table-bordered">
       <thead>
         <tr>
-          <th>Identifier</th>
-          <th>Patient</th>
-          <th>Code</th>
-          <th>Value</th>
+          <th scope="col">Tipo</th>
+          <th scope="col">ID Risorsa</th>
+          <th scope="col">Status</th>
+          <th scope="col">Data</th>
+          <th scope="col">Subject</th>
+          <th scope="col">Valore</th>
+          <th scope="col">Unità</th>
         </tr>
       </thead>
       <tbody id="observation-data"></tbody>

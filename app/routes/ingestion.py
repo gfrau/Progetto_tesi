@@ -1,31 +1,19 @@
-import csv
-import io
-import json
+import csv,io, json
 
-from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Request
 from sqlalchemy.orm import Session
-from sqlalchemy.exc import IntegrityError
 
 from app.services.database import get_db_session, save_resource
-from app.utils.transform import csv_to_patient, csv_to_encounter, csv_to_observation, map_json_to_fhir_resource
+from app.utils.anonymization import anonymize_patient, hash_identifier
+from app.utils.transform import *
 from app.auth.dependencies import require_role
-from app.models.fhir_resource import FhirResource
+from sqlalchemy.exc import IntegrityError
+
 
 router = APIRouter(tags=["Upload CSV/JSON"])
 
-# Headers attesi per l'upload CSV
-EXPECTED_HEADERS = {
-    "Encounter": {"encounter_id", "codice_fiscale", "status", "class", "data_inizio", "data_fine"},
-    "Patient": {"nome", "cognome", "codice_fiscale", "data_nascita", "telefono", "indirizzo", "cap", "citta", "gender"},
-    "Observation": {"observation_id","codice_fiscale","codice_lonic","descrizione_test","valore","unita","data_osservazione"}
-}
 
-def validate_csv_headers(headers: list[str], resource_type: str) -> bool:
-    if not headers or resource_type not in EXPECTED_HEADERS:
-        return False
-    headers_lower = set(h.strip().lower() for h in headers)
-    expected = set(h.lower() for h in EXPECTED_HEADERS[resource_type])
-    return expected.issubset(headers_lower)
+
 
 # --- Upload CSV endpoints ---
 @router.post("/upload/patient/csv")
@@ -34,59 +22,141 @@ def upload_patient_csv(
     db: Session = Depends(get_db_session),
     _: None = Depends(require_role("admin"))
 ):
-    reader = csv.DictReader(io.StringIO(file.file.read().decode("utf-8")))
-    if not validate_csv_headers(reader.fieldnames, "Patient"):
-        raise HTTPException(status_code=400, detail="Le intestazioni del file CSV non corrispondono alla risorsa Patient.")
+    """
+    Upload di un CSV di pazienti:
+    - Parsing riga per riga con validazione tramite fhir.resources.Patient (Pydantic)
+    - Anonimizzazione del codice fiscale
+    - Salvataggio nella tabella FHIR unica
+    Restituisce il conteggio di righe inserite, scartate e dettagli degli errori.
+    """
+    # Leggo tutto il contenuto del file CSV come stringa
+    text = file.file.read().decode("utf-8")
+    reader = csv.DictReader(io.
+                            StringIO(text))
 
-    inserted, skipped = 0, 0
+    # Controllo gli header: se non vanno bene, lancio erroe
+    if not validate_csv_headers(reader.fieldnames, "Patient"):
+        raise HTTPException(
+            status_code=400,
+            detail="Le intestazioni del file CSV non corrispondono alla risorsa Patient."
+        )
+
+    inserted = 0   # quante righe sono state importate con successo
+    skipped = 0    # quante righe sono state saltate
+    errors: list[str] = []  # qui metto i messaggi d’errore riga per riga
+
     for row in reader:
+        # 1) Provo a trasformare la riga in dict FHIR e validare con Pydantic
         try:
             fhir_data = csv_to_patient(row)
-            # Assicurati che fhir_data includa 'id'
-            if not fhir_data.get("id"):
-                identifier = fhir_data.get("identifier", [{}])[0].get("value")
-                fhir_data["id"] = identifier
-            try:
-                save_resource(db, "Patient", fhir_data)
-                inserted += 1
-            except IntegrityError:
-                db.rollback()
-                skipped += 1
-        except Exception:
+        except Exception as e:
+            errors.append(f"Parsing error riga {row}: {e}")
             skipped += 1
-    return {"inserted": inserted, "skipped": skipped}
+            continue  # passo alla prossima riga
 
+        # 2) Anonimizzazione: nascondo il codice fiscale
+        try:
+            fhir_data = anonymize_patient(fhir_data)
+        except Exception as e:
+            errors.append(f"Errore anonimizzazione riga {row}: {e}")
+            skipped += 1
+            continue
+
+        # 3) Mi assicuro che ci sia sempre un campo 'id'
+        if not fhir_data.get("id"):
+            identifier = fhir_data.get("identifier", [{}])[0].get("value")
+            fhir_data["id"] = identifier
+
+        # 4) Provo a salvare nel DB; gestisco duplicati e altri errori
+        try:
+            save_resource(db, "Patient", fhir_data)
+            inserted += 1
+        except IntegrityError as e:
+            db.rollback()
+            errors.append(f"Duplicato o IntegrityError riga {row}: {e}")
+            skipped += 1
+        except Exception as e:
+            db.rollback()
+            errors.append(f"Errore salvataggio riga {row}: {e}")
+            skipped += 1
+
+    # Infine ritorno i risultati dell'operazione
+    return {
+        "inserted": inserted,
+        "skipped": skipped,
+        "errors": errors
+    }
 @router.post("/upload/encounter/csv")
 def upload_encounter_csv(
+    request: Request,
     file: UploadFile = File(...),
     db: Session = Depends(get_db_session),
     _: None = Depends(require_role("admin"))
 ):
-    reader = csv.DictReader(io.StringIO(file.file.read().decode("utf-8")))
+    """
+    Upload di un CSV di Encounter:
+    - parsing riga per riga con validazione tramite fhir.resources.Encounter (Pydantic)
+    - salvataggio nella tabella FHIR unica
+    Restituisce il conteggio di righe inserite, scartate e dettagli degli errori.
+    """
+    text = file.file.read().decode("utf-8")
+    reader = csv.DictReader(io.StringIO(text))
     if not validate_csv_headers(reader.fieldnames, "Encounter"):
-        raise HTTPException(status_code=400, detail="Le intestazioni del file CSV non corrispondono alla risorsa Encounter.")
+        raise HTTPException(
+            status_code=400,
+            detail="Le intestazioni del file CSV non corrispondono alla risorsa Encounter."
+        )
 
-    inserted, skipped = 0, 0
+    inserted = 0
+    skipped = 0
+    errors: list[str] = []
+
     for row in reader:
+        # 1) parsing + validazione Pydantic/FHIR
         try:
             fhir_data = csv_to_encounter(row)
-            patient_id = fhir_data.get("subject", {}).get("identifier", {}).get("value", "")
-            exists = db.query(FhirResource).filter_by(resource_type="Patient").filter(FhirResource.content["identifier"][0]["value"].astext == patient_id).first()
-            if not exists:
-                skipped += 1
-                continue
-            # Ensure id present
-            if not fhir_data.get("id"):
-                fhir_data["id"] = fhir_data.get("identifier", [{}])[0].get("value")
-            try:
-                save_resource(db, "Encounter", fhir_data)
-                inserted += 1
-            except IntegrityError:
-                db.rollback()
-                skipped += 1
-        except Exception:
+        except Exception as e:
+            errors.append(f"Parsing error riga {row}: {e}")
             skipped += 1
-    return {"inserted": inserted, "skipped": skipped}
+            continue
+
+        # 2) anonimizzazione: hash del CF del paziente in subject.identifier
+        try:
+            # recupero il dict che contiene il CF
+            identifier_obj = fhir_data["subject"]["identifier"]
+            if isinstance(identifier_obj, dict):
+                original_cf = identifier_obj.get("value", "")
+                # uso la funzione hash_identifier già presente in anonymization.py
+                hashed_cf = hash_identifier(original_cf)
+                # riscrivo il valore col suo hash
+                fhir_data["subject"]["identifier"]["value"] = hashed_cf
+        except Exception:
+            # in caso di qualunque problema, proseguo comunque
+            pass
+
+        # 3) assicuro che l'Encounter abbia sempre un 'id'
+        if not fhir_data.get("id"):
+            fhir_data["id"] = row.get("encounter_id")
+
+        # 4) provo a salvare nel DB
+        try:
+            save_resource(db, "Encounter", fhir_data)
+            inserted += 1
+        except IntegrityError as e:
+            db.rollback()
+            errors.append(f"Duplicato o IntegrityError riga {row}: {e}")
+            skipped += 1
+        except Exception as e:
+            db.rollback()
+            errors.append(f"Errore salvataggio riga {row}: {e}")
+            skipped += 1
+
+    return {
+        "inserted": inserted,
+        "skipped": skipped,
+        "errors": errors
+    }
+
 
 @router.post("/upload/observation/csv")
 def upload_observation_csv(
@@ -94,33 +164,89 @@ def upload_observation_csv(
     db: Session = Depends(get_db_session),
     _: None = Depends(require_role("admin"))
 ):
-    reader = csv.DictReader(io.StringIO(file.file.read().decode("utf-8")))
-    if not validate_csv_headers(reader.fieldnames, "Observation"):
-        raise HTTPException(status_code=400, detail="Le intestazioni del file CSV non corrispondono alla risorsa Observation.")
+    """
+    Upload di un CSV di Observation:
+    - parsing riga per riga con validazione tramite csv_to_observation (Pydantic)
+    - anonimizzazione del codice fiscale in subject.identifier
+    - verifica che il paziente esista (hashato) in fhir_resources
+    - salvataggio nella tabella FHIR unica
+    Restituisce il conteggio di righe inserite, scartate e i dettagli degli errori.
+    """
+    import io, csv
+    from sqlalchemy.exc import IntegrityError
+    from app.services.database import save_resource
+    from app.utils.transform import csv_to_observation, validate_csv_headers
+    from app.utils.anonymization import hash_identifier
+    from app.models.fhir_resource import FhirResource
 
-    inserted, skipped, errors = 0, 0, []
+    # 1) Leggo e decodifico il CSV (UTF-8 o Latin-1)
+    raw = file.file.read()
+    try:
+        text = raw.decode("utf-8")
+    except UnicodeDecodeError:
+        text = raw.decode("latin-1")
+    reader = csv.DictReader(io.StringIO(text))
+
+    # 2) Controllo intestazioni
+    if not validate_csv_headers(reader.fieldnames, "Observation"):
+        raise HTTPException(
+            status_code=400,
+            detail="Le intestazioni del file CSV non corrispondono alla risorsa Observation."
+        )
+
+    inserted = 0
+    skipped  = 0
+    errors: list[str] = []
+
+    # 3) Giro ogni riga del CSV
     for row in reader:
+        # 3.1) Validazione Pydantic/FHIR
         try:
             fhir_data = csv_to_observation(row)
-            codice = fhir_data.get("subject", {}).get("identifier", {}).get("value", "")
-            exists = db.query(FhirResource).filter_by(resource_type="Patient").filter(FhirResource.content["identifier"][0]["value"].astext == codice).first()
-            if not exists:
-                errors.append(f"Paziente non trovato: {codice}")
-                skipped += 1
-                continue
-            if not fhir_data.get("id"):
-                fhir_data["id"] = fhir_data.get("identifier", [{}])[0].get("value")
-            try:
-                save_resource(db, "Observation", fhir_data)
-                inserted += 1
-            except IntegrityError:
-                db.rollback()
-                errors.append(f"Duplicato: {fhir_data.get('identifier',[{}])[0].get('value')}")
-                skipped += 1
         except Exception as e:
+            errors.append(f"Parsing error riga {row}: {e}")
             skipped += 1
-            errors.append(str(e))
+            continue
+
+        # 3.2) Anonimizzazione CF in subject.identifier
+        try:
+            subj = fhir_data["subject"]["identifier"]
+            if isinstance(subj, dict):
+                original = subj.get("value", "")
+                hashed   = hash_identifier(original)
+                fhir_data["subject"]["identifier"]["value"] = hashed
+        except Exception:
+            pass
+
+        # 3.3) Garantisco sempre un ID
+        if not fhir_data.get("id"):
+            fhir_data["id"] = row.get("observation_id")
+
+        # 3.4) Verifica che il paziente (hashato) esista
+        patient_exists = db.query(FhirResource).filter(
+            FhirResource.resource_type == "Patient",
+            FhirResource.id == fhir_data["subject"]["identifier"]["value"]
+        ).first()
+        if not patient_exists:
+            errors.append(f"Observation scartata: paziente {fhir_data['subject']['identifier']['value']} non trovato.")
+            skipped += 1
+            continue
+
+        # 3.5) Salvataggio su fhir_resources
+        try:
+            save_resource(db, "Observation", fhir_data)
+            inserted += 1
+        except IntegrityError as e:
+            db.rollback()
+            errors.append(f"Duplicato riga {row}: {e}")
+            skipped += 1
+        except Exception as e:
+            db.rollback()
+            errors.append(f"Errore salvataggio riga {row}: {e}")
+            skipped += 1
+
     return {"inserted": inserted, "skipped": skipped, "errors": errors}
+
 
 # --- Upload JSON mixed endpoint ---
 @router.post("/upload/json/bulk")
@@ -129,30 +255,82 @@ def upload_json_bulk(
     db: Session = Depends(get_db_session),
     _: None = Depends(require_role("admin"))
 ):
+    """
+    Upload bulk JSON (array di oggetti FHIR):
+    - validazione con fhir.resources (Pydantic)
+    - anonimizzazione CF per Patient e Observation
+    - verifica che Observation/Encounter abbiano un Patient esistente
+    - salvataggio in unica tabella fhir_resources
+    """
+    import json
+    from sqlalchemy.exc import IntegrityError
+    from app.services.database import save_resource
+    from app.utils.transform import map_json_to_fhir_resource
+    from app.utils.anonymization import anonymize_patient, hash_identifier
+    from app.models.fhir_resource import FhirResource
+    from fastapi import HTTPException
+
+    # 1) Leggo e parsifico il JSON
     try:
-        file.file.seek(0)
-        data = json.loads(file.file.read().decode("utf-8"))
+        raw = file.file.read().decode("utf-8")
+        payload = json.loads(raw)
     except Exception:
-        raise HTTPException(status_code=400, detail="JSON non valido.")
-    if not isinstance(data, list):
+        raise HTTPException(status_code=400, detail="File JSON non valido.")
+    if not isinstance(payload, list):
         raise HTTPException(status_code=400, detail="Ci si aspetta un array di oggetti FHIR.")
 
-    inserted, skipped, errors = 0, 0, []
-    for entry in data:
+    inserted = 0
+    skipped  = 0
+    errors: list[str] = []
+
+    # 2) Ciclo ogni risorsa
+    for entry in payload:
         try:
+            # 2.1) Validazione e conversione base
             resource_type, fhir_data = map_json_to_fhir_resource(entry)
-            if not fhir_data.get("id") and resource_type in ("Patient", "Encounter", "Observation"):
+
+            # 2.2) Assicuro un ID
+            if not fhir_data.get("id"):
                 fhir_data["id"] = fhir_data.get("identifier", [{}])[0].get("value")
+
+            # 2.3) Anonimizzazione CF per Patient
+            if resource_type == "Patient":
+                fhir_data = anonymize_patient(fhir_data)
+
+            # 2.4) Anonimizzazione CF per Observation
+            if resource_type == "Observation":
+                subj = fhir_data.get("subject", {}).get("identifier", {})
+                if isinstance(subj, dict):
+                    hashed = hash_identifier(subj.get("value", ""))
+                    fhir_data["subject"]["identifier"]["value"] = hashed
+
+            # 2.5) Verifica referenza Patient per Observation/Encounter
+            if resource_type in ("Observation", "Encounter"):
+                subj = fhir_data.get("subject", {})
+                # estraggo l’ID del patient (hash o reference)
+                pid = None
+                if "reference" in subj:
+                    pid = subj["reference"].split("/", 1)[-1]
+                elif "identifier" in subj:
+                    pid = subj["identifier"].get("value")
+                exists = db.query(FhirResource).filter(
+                    FhirResource.resource_type == "Patient",
+                    FhirResource.id == pid
+                ).first()
+                if not exists:
+                    raise ValueError(f"{resource_type} {fhir_data['id']}: paziente non trovato (hash={pid})")
+
+            # 2.6) Salvataggio
             try:
                 save_resource(db, resource_type, fhir_data)
                 inserted += 1
             except IntegrityError:
                 db.rollback()
                 skipped += 1
+
         except Exception as e:
             skipped += 1
-            identifier = entry.get("identifier", [{}])[0].get("value", "sconosciuto")
-            resource_type = entry.get("resourceType", "Unknown")
-            error_msg = f"{resource_type} {identifier}: {str(e)}"
-            errors.append(error_msg)
+            rid = entry.get("id") or entry.get("identifier", [{}])[0].get("value", "sconosciuto")
+            errors.append(f"{resource_type} {rid}: {e}")
+
     return {"inserted": inserted, "skipped": skipped, "errors": errors}
