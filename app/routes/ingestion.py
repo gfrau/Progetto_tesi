@@ -8,7 +8,7 @@ from sqlalchemy.orm import Session
 from app.services.database import get_db_session, save_resource, save_encounter_if_valid
 from app.models.fhir_resource import FhirResource
 from app.auth.dependencies import require_role
-from app.utils.transform import csv_to_patient, validate_csv_headers, csv_to_encounter, EXPECTED_HEADERS
+from app.utils.transform import *
 
 router = APIRouter(tags=["Upload CSV/JSON"])
 logger = logging.getLogger(__name__)
@@ -111,3 +111,57 @@ def upload_encounter_csv(
         "skipped": skipped,
         "errors": errors
     }
+
+
+@router.post("/upload/observation/csv")
+def upload_observation_csv(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db_session),
+    _: None = Depends(require_role("admin"))
+):
+    raw = file.file.read().decode("utf-8")
+    reader = csv.DictReader(io.StringIO(raw))
+
+    if not validate_csv_headers(reader.fieldnames, "Observation"):
+        raise HTTPException(status_code=400, detail="Intestazioni CSV non valide per Observation")
+
+    inserted, skipped, errors = 0, 0, []
+
+    for row in reader:
+        try:
+            fhir_data = csv_to_observation(row)
+
+            # Controllo che il Patient esista
+            patient_id = fhir_data["subject"]["identifier"]["value"]
+            patient_exists = db.query(FhirResource).filter(
+                FhirResource.resource_type == "Patient",
+                FhirResource.content["identifier"][0]["value"].astext == patient_id
+            ).first()
+            if not patient_exists:
+                msg = f"Observation scartata: paziente {patient_id} non trovato."
+                logger.warning(msg)
+                errors.append(msg)
+                skipped += 1
+                continue
+
+            # Deduplicazione su identifier
+            obs_id = fhir_data.get("identifier", [{}])[0].get("value")
+            exists = db.query(FhirResource).filter(
+                FhirResource.resource_type == "Observation",
+                FhirResource.content["identifier"][0]["value"].astext == obs_id
+            ).first()
+            if exists:
+                logger.info(f"Observation duplicata con identifier {obs_id}")
+                skipped += 1
+                continue
+
+            save_resource(db, "Observation", fhir_data)
+            inserted += 1
+
+        except Exception as e:
+            msg = f"Errore nella creazione Observation: {e} - Riga: {row}"
+            logger.error(msg)
+            errors.append(msg)
+            skipped += 1
+
+    return {"inserted": inserted, "skipped": skipped, "errors": errors}

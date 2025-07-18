@@ -1,17 +1,39 @@
-# app/schemas/observation.py
 from pydantic import BaseModel, Field
-from typing import Optional, Literal, Dict, Any
+from typing import Optional, List, Literal
+
+
+class Coding(BaseModel):
+    system: Optional[str] = Field(default="http://loinc.org")
+    code: str
+    display: Optional[str] = None
+
+
+class CodeableConcept(BaseModel):
+    coding: List[Coding]
+    text: Optional[str] = None
+
+
+class Quantity(BaseModel):
+    value: float
+    unit: Optional[str] = None
+
+
+class Reference(BaseModel):
+    identifier: dict  # {"value": hashed_cf}
+
 
 class ObservationBase(BaseModel):
-    resourceType: Literal["Observation"] = "Observation"
-    status: str
-    code: Dict[str, Any]
-    subject: Dict[str, Any]
-    effectiveDateTime: Optional[str]
-    valueQuantity: Optional[Dict[str, Any]]
+    status: str = Field(..., example="final")
+    code: CodeableConcept
+    subject: Reference
+    valueQuantity: Quantity
+    effectiveDateTime: str
+
 
 class ObservationCreate(ObservationBase):
-    id: Optional[str]
+    pass
+
 
 class ObservationRead(ObservationBase):
     id: str
+    resourceType: Literal["Observation"] = Field(default="Observation")

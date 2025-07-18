@@ -1,13 +1,13 @@
 import logging
 import hashlib
 import shortuuid
+from fhir.resources.observation import Observation
 
 from fhir.resources.patient import Patient
 from fhir.resources.address import Address
-from fhir.resources.encounter import Encounter
 from fhir.resources.identifier import Identifier
+from fhir.resources.quantity import Quantity
 from fhir.resources.reference import Reference
-from fhir.resources.period import Period
 from fhir.resources.codeableconcept import CodeableConcept
 from fhir.resources.coding import Coding
 from app.utils.anonymization import hash_identifier
@@ -105,4 +105,42 @@ def csv_to_encounter(row: dict) -> dict:
 
     except Exception as e:
         logger.error(f"Errore nella creazione Encounter: {e}")
+        raise
+
+
+def generate_observation_id() -> str:
+    return "obs" + shortuuid.ShortUUID().random(length=8)
+
+def normalize_datetime(value: str) -> str:
+    val = value.strip()
+    return val if val.endswith("Z") else val + "Z"
+
+def csv_to_observation(row: dict) -> dict:
+    try:
+        cf = row.get("codice_fiscale", "").strip()
+        hashed_cf = hash_identifier(cf)
+
+        observation = Observation(
+            id=generate_observation_id(),
+            status="final",
+            code=CodeableConcept(
+                coding=[Coding(
+                    system="http://loinc.org",
+                    code=row.get("codice_lonic", "").strip(),
+                    display=row.get("descrizione_test", "").strip()
+                )]
+            ),
+            valueQuantity=Quantity(
+                value=float(row.get("valore", "0.0")),
+                unit=row.get("unita", "").strip()
+            ),
+            effectiveDateTime=normalize_datetime(row.get("data_osservazione", "")),            subject=Reference(identifier={"value": hashed_cf}),
+            identifier=[Identifier(
+                system="http://fhir.example.org",
+                value=row.get("observation_id", "").strip()
+            )]
+        )
+        return observation.model_dump(mode="json")
+    except Exception as e:
+        logger.error(f"Errore nella creazione Observation: {e}")
         raise

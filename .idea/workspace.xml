@@ -7,14 +7,9 @@
     <list default="true" id="73a2d709-0896-4b80-ad05-861ea87787af" name="Changes" comment="grafica e logica aggiornata">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/logs/audit.ndjson" beforeDir="false" afterPath="$PROJECT_DIR$/app/logs/audit.ndjson" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routes/encounter.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/encounter.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/routes/ingestion.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/ingestion.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/schemas/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/schemas/encounter.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/encounter.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/schemas/observation.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/observation.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/services/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/services/database.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/utils/transform.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/utils/transform.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/js/test.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/test.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -169,7 +164,7 @@
       <workItem from="1752679711477" duration="3181000" />
       <workItem from="1752776136803" duration="6747000" />
       <workItem from="1752842218359" duration="52000" />
-      <workItem from="1752846387847" duration="18860000" />
+      <workItem from="1752846387847" duration="20126000" />
     </task>
     <task id="LOCAL-00001" summary="grafica e logica aggiornata">
       <option name="closed" value="true" />
