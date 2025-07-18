@@ -1,12 +1,14 @@
 from fastapi import APIRouter, Request, Depends
 from fastapi.responses import JSONResponse, HTMLResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
+from fhir.resources.encounter import Encounter
+from fhir.resources.observation import Observation
+from fhir.resources.patient import Patient
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 from app.auth.dependencies import require_role
 from app.services.database import SessionLocal, get_db_session
-from app.models import fhir_resource
 from app.utils.session_manager import get_session
 
 

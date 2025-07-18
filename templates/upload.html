@@ -11,7 +11,7 @@
 
 
       <!-- CSV Section -->
-      <div class="card shadow-sm mb-4">
+      <div class="card shadow-sm mb-5">
         <div class="card-body">
           <h5 class="card-title">Upload da CSV</h5>
 
@@ -38,6 +38,15 @@
               <button type="submit" class="btn btn-warning text-white upload-btn w-25">Upload Observation</button>
             </div>
           </form>
+
+          <!-- Condition CSV -->
+          <form id="conditionCsvForm" enctype="multipart/form-data" class="mb-3">
+            <div class="input-group">
+              <input type="file" name="file" accept=".csv" required class="form-control">
+              <button type="submit" class="btn btn-primary upload-btn w-25">Upload Condition</button>
+            </div>
+          </form>
+
         </div>
       </div>
 

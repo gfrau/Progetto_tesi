@@ -5,11 +5,24 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="73a2d709-0896-4b80-ad05-861ea87787af" name="Changes" comment="grafica e logica aggiornata">
+      <change afterPath="$PROJECT_DIR$/app/routes/condition.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/app/schemas/condition.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/logs/audit.ndjson" beforeDir="false" afterPath="$PROJECT_DIR$/app/logs/audit.ndjson" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/dashboard.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/dashboard.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/routes/ingestion.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/ingestion.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/schemas/observation.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/observation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/observation.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/observation.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/stats.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/stats.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/template.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/template.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schemas/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/utils/transform.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/utils/transform.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/js/dashboard.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/dashboard.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/js/test.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/test.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/static/js/upload.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/upload.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/test_data_view.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/test_data_view.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/upload.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/upload.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -164,7 +177,7 @@
       <workItem from="1752679711477" duration="3181000" />
       <workItem from="1752776136803" duration="6747000" />
       <workItem from="1752842218359" duration="52000" />
-      <workItem from="1752846387847" duration="20126000" />
+      <workItem from="1752846387847" duration="24608000" />
     </task>
     <task id="LOCAL-00001" summary="grafica e logica aggiornata">
       <option name="closed" value="true" />

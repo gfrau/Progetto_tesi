@@ -12,7 +12,7 @@ def get_template(filename: str):
     """
     Restituisce i file CSV o JSON di template per l'import delle risorse FHIR.
     """
-    allowed_files = {"patient.csv", "encounter.csv", "observation.csv", "unified.json"}
+    allowed_files = {"patient.csv", "encounter.csv", "observation.csv", "condition.csv", "unified.json"}
     if filename not in allowed_files:
         raise HTTPException(status_code=404, detail="Template non disponibile")
 

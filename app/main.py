@@ -20,6 +20,7 @@ from app.routes import (
     patient,
     encounter,
     observation,
+    condition,
     dashboard,
     loinc,
     maintenance,
@@ -28,7 +29,8 @@ from app.routes import (
     stats,
     frontend,
     template,
-    test, ingestion,
+    test,
+    ingestion,
 )
 
 app = FastAPI(
@@ -65,6 +67,8 @@ app.include_router(template.router, dependencies=[Depends(require_role("viewer")
 app.include_router(patient.router, prefix="/api")
 app.include_router(encounter.router, prefix="/api")
 app.include_router(observation.router, prefix="/api")
+app.include_router(condition.router, prefix="/api")
+
 app.include_router(ingestion.router, prefix="/api")
 app.include_router(loinc.router, prefix="/api")
 app.include_router(maintenance.router, prefix="/api")

@@ -47,10 +47,13 @@ def get_stats_overview(db: Session = Depends(get_db_session)):
     patients = db.query(FhirResource).filter_by(resource_type="Patient").count()
     encounters = db.query(FhirResource).filter_by(resource_type="Encounter").count()
     observations = db.query(FhirResource).filter_by(resource_type="Observation").count()
+    conditions = db.query(FhirResource).filter_by(resource_type="Condition").count()
+
     return JSONResponse(content={
         "patients": patients,
         "encounters": encounters,
-        "observations": observations
+        "observations": observations,
+        "conditions": conditions
     })
 
 

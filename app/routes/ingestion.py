@@ -113,6 +113,7 @@ def upload_encounter_csv(
     }
 
 
+
 @router.post("/upload/observation/csv")
 def upload_observation_csv(
     file: UploadFile = File(...),
@@ -160,6 +161,67 @@ def upload_observation_csv(
 
         except Exception as e:
             msg = f"Errore nella creazione Observation: {e} - Riga: {row}"
+            logger.error(msg)
+            errors.append(msg)
+            skipped += 1
+
+    return {"inserted": inserted, "skipped": skipped, "errors": errors}
+
+
+
+@router.post("/upload/condition/csv")
+def upload_condition_csv(
+    file: UploadFile = File(...),
+    db: Session = Depends(get_db_session),
+    _: None = Depends(require_role("admin"))
+):
+    raw = file.file.read().decode("utf-8")
+    reader = csv.DictReader(io.StringIO(raw))
+
+    if not validate_csv_headers(reader.fieldnames, "Condition"):
+        raise HTTPException(status_code=400, detail="Intestazioni CSV non valide per risorsa Condition.")
+
+    inserted, skipped, errors = 0, 0, []
+
+    for row in reader:
+        try:
+            fhir_data = csv_to_condition(row)
+
+            # Verifica se il Patient esiste nel DB
+            patient_id = fhir_data["subject"]["identifier"]["value"]
+            exists = db.query(FhirResource).filter(
+                FhirResource.resource_type == "Patient",
+                FhirResource.content["identifier"][0]["value"].astext == patient_id
+            ).first()
+
+            if not exists:
+                msg = f"Condition scartata: paziente {patient_id} non trovato."
+                logger.warning(msg)
+                errors.append(msg)
+                skipped += 1
+                continue
+
+            # Deduplicazione: evita condizioni duplicate con stesso codice e data
+            condition_code = fhir_data.get("code", {}).get("coding", [{}])[0].get("code")
+            condition_date = fhir_data.get("onsetDateTime")
+
+            duplicate = db.query(FhirResource).filter(
+                FhirResource.resource_type == "Condition",
+                FhirResource.content["code"]["coding"][0]["code"].astext == condition_code,
+                FhirResource.content["onsetDateTime"].astext == condition_date,
+                FhirResource.content["subject"]["identifier"]["value"].astext == patient_id
+            ).first()
+
+            if duplicate:
+                logger.info(f"Duplicate Condition per paziente {patient_id} con codice {condition_code} e data {condition_date}")
+                skipped += 1
+                continue
+
+            save_resource(db, "Condition", fhir_data)
+            inserted += 1
+
+        except Exception as e:
+            msg = f"Errore nella creazione della risorsa Condition: {e} - Riga: {row}"
             logger.error(msg)
             errors.append(msg)
             skipped += 1

@@ -1,5 +1,3 @@
-# app/routes/observation.py
-
 from fastapi import APIRouter, Depends, HTTPException, Response, status, Request
 from sqlalchemy.orm import Session
 

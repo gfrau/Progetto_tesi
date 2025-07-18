@@ -1,6 +1,7 @@
 import logging
 import hashlib
 import shortuuid
+from fhir.resources.condition import Condition
 from fhir.resources.observation import Observation
 
 from fhir.resources.patient import Patient
@@ -134,7 +135,8 @@ def csv_to_observation(row: dict) -> dict:
                 value=float(row.get("valore", "0.0")),
                 unit=row.get("unita", "").strip()
             ),
-            effectiveDateTime=normalize_datetime(row.get("data_osservazione", "")),            subject=Reference(identifier={"value": hashed_cf}),
+            effectiveDateTime=normalize_datetime(row.get("data_osservazione", "")),
+            subject=Reference(identifier={"value": hashed_cf}),
             identifier=[Identifier(
                 system="http://fhir.example.org",
                 value=row.get("observation_id", "").strip()
@@ -143,4 +145,32 @@ def csv_to_observation(row: dict) -> dict:
         return observation.model_dump(mode="json")
     except Exception as e:
         logger.error(f"Errore nella creazione Observation: {e}")
+        raise
+
+
+def generate_condition_id() -> str:
+        return "con" + shortuuid.ShortUUID().random(length=8)
+
+def csv_to_condition(row: dict) -> dict:
+    try:
+        hashed_cf = hash_identifier(row.get("codice_fiscale", "").strip())
+        condition = Condition(
+            id=generate_condition_id(),
+            resourceType="Condition",
+            subject=Reference(identifier={"value": hashed_cf}),
+            code=CodeableConcept(
+                coding=[Coding(
+                system="http://hl7.org/fhir/sid/icd-10",
+                code=row.get("codice_icd10", "").strip(),
+                display=row.get("descrizione_diagnosi", "").strip()
+                )]
+            ),
+
+            effectiveDateTime=normalize_datetime(row.get("data_diagnosi", ""))
+        )
+
+        return condition.model_dump(mode="json")
+
+    except Exception as e:
+        logger.error(f"Errore nella creazione della risorsa Condition: {e} - Riga: {row}")
         raise

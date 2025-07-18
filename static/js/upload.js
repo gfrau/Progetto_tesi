@@ -127,5 +127,7 @@ document.addEventListener("DOMContentLoaded", function () {
   handleCsvUpload("patientCsvForm", "/api/upload/patient/csv");
   handleCsvUpload("encounterCsvForm", "/api/upload/encounter/csv");
   handleCsvUpload("observationCsvForm", "/api/upload/observation/csv");
+  handleCsvUpload("conditionCsvForm", "/api/upload/condition/csv");
+
   handleJsonUpload();
 });

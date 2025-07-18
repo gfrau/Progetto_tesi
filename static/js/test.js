@@ -207,6 +207,10 @@ function renderTable(data) {
     "Observation": [
       "resourceType", "id", "code.coding.0.display", "code.coding.0.code",
       "valueQuantity.value", "valueQuantity.unit", "effectiveDateTime", "subject.identifier.value"
+    ],
+    "Condition": [
+      "resourceType", "id", "code.coding.0.display", "code.coding.0.code",
+      "subject.identifier.value", "onsetDateTime", "recordedDate"
     ]
 };
 

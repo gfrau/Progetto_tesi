@@ -2,6 +2,7 @@ from . import (
     patient,
     encounter,
     observation,
+    condition,
     dashboard,
     loinc,
     maintenance,

@@ -3,6 +3,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const kpiPatients = document.getElementById("kpiPatients");
     const kpiIncontri = document.getElementById("kpiIncontri");
     const kpiParametri = document.getElementById("kpiParametri");
+    const kpiCondizioni = document.getElementById("kpiCondizioni");
 
     async function updateKPIs() {
         try {
@@ -11,6 +12,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             kpiPatients.textContent = stats.patients;
             kpiIncontri.textContent = stats.encounters;
             kpiParametri.textContent = stats.observations;
+            kpiCondizioni.textContent = stats.conditions;
+
         } catch (error) {
             console.error("Errore caricamento KPI:", error);
         }
