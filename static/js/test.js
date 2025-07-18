@@ -197,7 +197,7 @@ function renderTable(data) {
   const resourceType = data[0].resourceType;
   const headersByType = {
     "Patient": [
-      "resourceType", "identifier.0.value", "name.0.family", "name.0.given.0",
+      "resourceType", "id", "identifier.0.value", "name.0.family", "name.0.given.0",
       "birthDate", "gender", "address.0.city", "address.0.district", "address.0.postalCode"
     ],
     "Encounter": [

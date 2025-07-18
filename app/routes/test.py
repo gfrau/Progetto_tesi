@@ -5,7 +5,7 @@ from sqlalchemy import func
 
 from app.services.database import get_db_session
 from app.models.fhir_resource import FhirResource
-from app.utils.transform import is_valid_loinc_code
+#from app.utils.transform import is_valid_loinc_code
 
 router = APIRouter(tags=["test"])
 

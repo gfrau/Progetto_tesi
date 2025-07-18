@@ -28,8 +28,7 @@ from app.routes import (
     stats,
     frontend,
     template,
-    ingestion,
-    test,
+    test, ingestion,
 )
 
 app = FastAPI(
