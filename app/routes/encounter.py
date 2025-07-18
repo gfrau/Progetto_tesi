@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, Response, status, Request
 from sqlalchemy.orm import Session
 
 from app.auth.dependencies import require_role
+from app.models import FhirResource
 from app.utils.audit import log_audit_event
 from app.services.database import get_db_session
 from app.models.fhir_resource import FhirResource
@@ -14,7 +15,7 @@ def list_encounters(
     db: Session = Depends(get_db_session),
     _: None = Depends(require_role("viewer"))
 ):
-    rows = db.query(FhirResource).filter_by(resource_type="Encounter").all()
+    rows: list[type[FhirResource]] = db.query(FhirResource).filter_by(resource_type="Encounter").all()
     log_audit_event(
         event_type="110101",
         username=request.session.get("username", "anon"),
@@ -23,9 +24,20 @@ def list_encounters(
         action="R",
         entity_type="Encounter"
     )
-    return [EncounterRead(**row.content) for row in rows]
+    return [
+        EncounterRead(
+            id=row.content.get("id"),
+            resourceType=row.content.get("resourceType", "Encounter"),
+            status=row.content.get("status"),
+            class_fhir=row.content.get("class"),
+            subject=row.content.get("subject"),
+            period=row.content.get("period"),
+            identifier=row.content.get("identifier")
+        )
+        for row in rows
+    ]
 
-@router.get("/{identifier}", response_model=EncounterRead)
+
 def get_encounter(
     identifier: str,
     request: Request,

@@ -1,15 +1,12 @@
-
-# schemas/encounter.py
-
 from pydantic import BaseModel, Field
-from typing import Optional, Literal
+from typing import Literal, Optional, Dict, Any, List
 
 
 class EncounterRead(BaseModel):
     id: str
-    status: str
-    class_code: Optional[str]
-    patient_id: Optional[str]
-    start: Optional[str]
-    end: Optional[str]
-    resourceType: Literal["Encounter"] = "Encounter"
+    resourceType: Literal["Encounter"]
+    status: Optional[str] = None
+    class_fhir: Optional[Dict[str, Any]] = None
+    subject: Optional[Dict[str, Any]] = None
+    period: Optional[Dict[str, Any]] = None
+    identifier: Optional[List[Dict[str, str]]] = None

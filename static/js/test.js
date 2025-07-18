@@ -184,7 +184,7 @@ function renderTable(data) {
     "period.start": "Data Inizio",
     "period.end": "Data Fine",
     "status": "Stato",
-    "class.code": "Classe",
+    "class_fhir.coding.0.code": "Classe",
     "code.coding.0.display": "Test",
     "code.coding.0.code": "Codice LOINC",
     "effectiveDateTime": "Data Osservazione",
@@ -201,7 +201,7 @@ function renderTable(data) {
       "birthDate", "gender", "address.0.city", "address.0.district", "address.0.postalCode"
     ],
     "Encounter": [
-      "resourceType", "id", "status", "class.coding.0.code",
+      "resourceType", "id", "status", "class_fhir.coding.0.code",
       "period.start", "period.end", "subject.identifier.value"
     ],
     "Observation": [
@@ -209,6 +209,8 @@ function renderTable(data) {
       "valueQuantity.value", "valueQuantity.unit", "effectiveDateTime", "subject.identifier.value"
     ]
 };
+
+
 
   const headers = headersByType[resourceType] || Object.keys(flattenObject(data[0]));
 

@@ -1,4 +1,6 @@
 import os
+
+from fhir.resources.encounter import Encounter
 from sqlalchemy import create_engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import sessionmaker, scoped_session, Session
@@ -38,7 +40,7 @@ def reset_database():
         print("Inizio reset database...")
         db.query(FhirResource).delete()
         db.commit()
-        print("✅ Database resettato correttamente.")
+        print("Database resettato correttamente.")
     except SQLAlchemyError as e:
         db.rollback()
         print(f"Errore nel reset del database: {str(e)}")
@@ -66,12 +68,18 @@ def load_or_deduplicate_patient(db: Session, fhir_data: dict) -> tuple[bool, dic
     return True, fhir_data
 
 
-def save_encounter_if_valid(db: Session, fhir_data: dict) -> bool:
+def save_encounter_if_valid(db: Session, fhir_data: Encounter | dict) -> bool:
     """
     Verifica che il Patient di riferimento esista prima di salvare.
-    Altrimenti solleva ValueError.
+    Se Encounter già esiste o Patient mancante, solleva ValueError.
     """
-    subject = fhir_data.get("subject", {})
+    # Se Pydantic, serializzo in dict JSON-safe
+    if hasattr(fhir_data, "model_dump"):
+        fhir_dict = fhir_data.model_dump(mode="json")
+    else:
+        fhir_dict = fhir_data
+
+    subject = fhir_dict.get("subject", {})
     if "reference" in subject:
         patient_id = subject["reference"].replace("Patient/", "")
     elif "identifier" in subject:
@@ -88,7 +96,7 @@ def save_encounter_if_valid(db: Session, fhir_data: dict) -> bool:
     ):
         raise ValueError(f"Patient {patient_id} non trovato nel database")
 
-    identifier = fhir_data.get("identifier", [{}])[0].get("value")
+    identifier = fhir_dict.get("identifier", [{}])[0].get("value")
     if (
         db.query(FhirResource)
           .filter_by(resource_type="Encounter")
@@ -97,7 +105,7 @@ def save_encounter_if_valid(db: Session, fhir_data: dict) -> bool:
     ):
         raise ValueError(f"Encounter {identifier} già presente nel database")
 
-    db.add(FhirResource(id=fhir_data.get("id"), resource_type="Encounter", content=fhir_data))
+    db.add(FhirResource(id=fhir_dict.get("id"), resource_type="Encounter", content=fhir_dict))
     db.commit()
     return True
 
