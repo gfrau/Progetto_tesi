@@ -1,4 +1,5 @@
 from typing import List
+import logging
 
 from fastapi import APIRouter, Depends, HTTPException, Response, status, Request
 from sqlalchemy.orm import Session
@@ -9,7 +10,9 @@ from app.services.database import get_db_session
 from app.models.fhir_resource import FhirResource
 from app.schemas import ConditionCreate, ConditionRead
 
-router = APIRouter(prefix="/condictions", tags=["Condictions"])
+logger = logging.getLogger(__name__)
+
+router = APIRouter(prefix="/conditions", tags=["Conditions"])
 
 
 @router.post("/", response_model=ConditionRead, status_code=status.HTTP_201_CREATED)
@@ -35,20 +38,45 @@ def create_condition(
     return ConditionRead(**new.content)
 
 
-@router.get("/", response_model=List[ConditionRead])
+@router.get("/", response_model=list[ConditionRead])
 def list_conditions(
+    request: Request,
     db: Session = Depends(get_db_session),
-    _: None = Depends(require_role("admin"))
+    _: None = Depends(require_role("viewer"))
 ):
     rows = db.query(FhirResource).filter(FhirResource.resource_type == "Condition").all()
-    return [ConditionRead(**row.content) for row in rows]
+    results = []
+    for row in rows:
+        try:
+            raw = row.content
+            data = raw.copy()
+            # flatten clinicalStatus code
+            data['clinicalStatus'] = raw.get('clinicalStatus', {}).get('coding', [{}])[0].get('code')
+            # flatten verificationStatus code
+            data['verificationStatus'] = raw.get('verificationStatus', {}).get('coding', [{}])[0].get('code')
+            results.append(ConditionRead(**data))
+        except Exception as e:
+            logger.warning(f"Condition malformata (id: {raw.get('id', 'N/A')}): {e}")
+            continue
+    log_audit_event(
+        event_type="110101",
+        username=request.session.get("username", "anon"),
+        success=True,
+        ip=request.client.host,
+        action="R",
+        entity_type="Condition"
+    )
+    return results
+
+
+
 
 
 @router.get("/{identifier}", response_model=ConditionRead)
 def get_condition(
     identifier: str,
     db: Session = Depends(get_db_session),
-    _: None = Depends(require_role("admin"))
+    _: None = Depends(require_role("viewer"))
 ):
     row = db.query(FhirResource).filter(
         FhirResource.resource_type == "Condition",
@@ -56,7 +84,11 @@ def get_condition(
     ).first()
     if not row:
         raise HTTPException(status_code=404, detail="Condition not found")
-    return ConditionRead(**row.content)
+    raw = row.content
+    data = raw.copy()
+    data['clinicalStatus'] = raw.get('clinicalStatus', {}).get('coding', [{}])[0].get('code')
+    data['verificationStatus'] = raw.get('verificationStatus', {}).get('coding', [{}])[0].get('code')
+    return ConditionRead(**data)
 
 
 @router.put("/{identifier}", response_model=ConditionRead)

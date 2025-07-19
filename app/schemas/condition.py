@@ -20,10 +20,10 @@ class Reference(BaseModel):
 
 
 class ConditionBase(BaseModel):
-    subject: Reference
-    code: CodeableConcept
     clinicalStatus: CodeableConcept
-    verificationStatus: CodeableConcept
+    verificationStatus: Optional[CodeableConcept]
+    code: CodeableConcept
+    subject: Reference
     recordedDate: Optional[str] = None
 
 
@@ -31,6 +31,12 @@ class ConditionCreate(ConditionBase):
     id: Optional[str] = None
 
 
-class ConditionRead(ConditionBase):
-    id: str
+
+class ConditionRead(BaseModel):
     resourceType: Literal["Condition"] = "Condition"
+    id: str
+    subject: Reference
+    recordedDate: Optional[str]
+    clinicalStatus: CodeableConcept
+    verificationStatus: CodeableConcept
+    code: CodeableConcept

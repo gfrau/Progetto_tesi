@@ -4,6 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
+      //console.log("Condition form submitted");  // << DEBUG LOG
       const fileInput = form.querySelector("input[type='file']");
       const file = fileInput.files[0];
       if (!file) return;

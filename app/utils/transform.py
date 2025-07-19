@@ -20,6 +20,7 @@ EXPECTED_HEADERS = {
     "Patient": {"nome", "cognome", "codice_fiscale", "data_nascita", "telefono", "indirizzo", "cap", "citta", "provincia", "gender"},
     "Encounter": {"encounter_id", "codice_fiscale", "status", "class", "data_inizio", "data_fine"},
     "Observation": {"observation_id", "codice_fiscale", "codice_lonic", "descrizione_test", "valore", "unita", "data_osservazione"},
+    "Condition": {"condition_id", "codice_fiscale", "codice_icd", "descrizione", "data_diagnosi"}
 }
 
 
@@ -148,29 +149,53 @@ def csv_to_observation(row: dict) -> dict:
         raise
 
 
+
+
 def generate_condition_id() -> str:
         return "con" + shortuuid.ShortUUID().random(length=8)
 
 def csv_to_condition(row: dict) -> dict:
     try:
         hashed_cf = hash_identifier(row.get("codice_fiscale", "").strip())
+        condition_id = "cond" + shortuuid.ShortUUID().random(length=8)
+
+        codice_icd = row.get("codice_icd", "").strip()
+        descrizione = row.get("descrizione", "").strip()
+        data_diagnosi = row.get("data_diagnosi", "").strip()
+
+        if not codice_icd or not descrizione:
+            raise ValueError("Campi 'codice_icd' o 'descrizione' mancanti o vuoti.")
+
         condition = Condition(
-            id=generate_condition_id(),
-            resourceType="Condition",
-            subject=Reference(identifier={"value": hashed_cf}),
-            code=CodeableConcept(
+            id=condition_id,
+            clinicalStatus=CodeableConcept(
                 coding=[Coding(
-                system="http://hl7.org/fhir/sid/icd-10",
-                code=row.get("codice_icd10", "").strip(),
-                display=row.get("descrizione_diagnosi", "").strip()
+                    system="http://terminology.hl7.org/CodeSystem/condition-clinical",
+                    code="active",
+                    display="Active"
                 )]
             ),
-
-            effectiveDateTime=normalize_datetime(row.get("data_diagnosi", ""))
+            verificationStatus = CodeableConcept(
+            coding=[Coding(
+                system="http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                code="confirmed",
+                display="Confirmed"
+                )]
+            ),
+            code=CodeableConcept(
+                coding=[Coding(
+                    system="http://hl7.org/fhir/sid/icd-10",
+                    code=codice_icd,
+                    display=descrizione
+                )],
+                text=descrizione
+            ),
+            subject=Reference(identifier={"value": hashed_cf}),
+            recordedDate=data_diagnosi,
         )
 
         return condition.model_dump(mode="json")
 
     except Exception as e:
-        logger.error(f"Errore nella creazione della risorsa Condition: {e} - Riga: {row}")
+        logger.error(f"Errore nella creazione della risorsa Condition: {e}")
         raise

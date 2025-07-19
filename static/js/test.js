@@ -202,7 +202,7 @@ function renderTable(data) {
     ],
     "Encounter": [
       "resourceType", "id", "status", "class_fhir.coding.0.code",
-      "period.start", "period.end", "subject.identifier.value"
+      "period.start", "peraiiod.end", "subject.identifier.value"
     ],
     "Observation": [
       "resourceType", "id", "code.coding.0.display", "code.coding.0.code",
@@ -210,7 +210,7 @@ function renderTable(data) {
     ],
     "Condition": [
       "resourceType", "id", "code.coding.0.display", "code.coding.0.code",
-      "subject.identifier.value", "onsetDateTime", "recordedDate"
+      "subject.identifier.value", "recordedDate", "clinicalStatus", "verificationStatus.coding.0.code"
     ]
 };
 
