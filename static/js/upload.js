@@ -77,19 +77,23 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
     // --- JSON bulk upload
-  function handleJsonUpload() {
-    const form = document.getElementById("genericJsonForm");
+  function handleJsonUpload(formId, endpoint) {
+    const form = document.getElementById(formId);
     if (!form) {
-      console.warn("Form genericJsonForm non trovato");
+      console.warn(`Form ${formId} non trovato`);
       return;
     }
-    form.addEventListener("submit", async e => {
+    form.addEventListener("submit", async (e) => {
       e.preventDefault();
-      const fd = new FormData(form);
+      const fileInput = form.querySelector("input[type='file']");
+      const file = fileInput.files[0];
+      if (!file) return;
+      const formData = new FormData();
+      formData.append("file", file);
 
       try {
-        const resp = await fetch("/api/upload/json/bulk", { method: "POST", body: fd });
-        const res = await resp.json();
+        const resp = await fetch(endpoint, { method: "POST", body: formData });
+        const res  = await resp.json();
         if (!resp.ok) throw new Error(res.detail || "Errore JSON");
 
         Toastify({
@@ -103,7 +107,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
         if (res.errors?.length) {
           Toastify({
-            text: `JSON Errori:\n${res.errors.slice(0,15).join("\\n")}`,
+            text: `JSON Errori:\n${res.errors.slice(0,15).join("\n")}`,
             duration: -1,
             gravity: "top",
             position: "center",
@@ -124,11 +128,10 @@ document.addEventListener("DOMContentLoaded", function () {
     });
   }
 
-
   handleCsvUpload("patientCsvForm", "/api/upload/patient/csv");
   handleCsvUpload("encounterCsvForm", "/api/upload/encounter/csv");
   handleCsvUpload("observationCsvForm", "/api/upload/observation/csv");
   handleCsvUpload("conditionCsvForm", "/api/upload/condition/csv");
 
-  handleJsonUpload();
+  handleJsonUpload("genericJsonForm", "/api/json/bulk");
 });

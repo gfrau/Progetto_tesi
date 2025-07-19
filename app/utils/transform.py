@@ -1,17 +1,26 @@
 import logging
 import hashlib
+import uuid
 import shortuuid
+
 from fhir.resources.condition import Condition
 from fhir.resources.observation import Observation
-
 from fhir.resources.patient import Patient
 from fhir.resources.address import Address
 from fhir.resources.identifier import Identifier
 from fhir.resources.quantity import Quantity
 from fhir.resources.reference import Reference
+
 from fhir.resources.codeableconcept import CodeableConcept
 from fhir.resources.coding import Coding
+
+from sqlalchemy.orm import Session
+
+from app.schemas import PatientCreate, ObservationCreate, ConditionCreate, EncounterCreate
+
 from app.utils.anonymization import hash_identifier
+from app.models.fhir_resource import FhirResource
+
 
 logger = logging.getLogger(__name__)
 
@@ -199,3 +208,84 @@ def csv_to_condition(row: dict) -> dict:
     except Exception as e:
         logger.error(f"Errore nella creazione della risorsa Condition: {e}")
         raise
+
+
+
+
+JSON_SCHEMA_MAP: dict[str, type] = {
+    "Patient": PatientCreate,
+    "Condition": ConditionCreate,
+    "Observation": ObservationCreate,
+    "Encounter": EncounterCreate,
+}
+
+def process_json_resources(resources: list[dict], db: Session) -> dict:
+    """
+    Valida e persiste in batch un array di risorse FHIR di tipi diversi.
+    Ritorna un report { total, processed, errors }.
+    """
+    summary = {
+        "total": len(resources),
+        "processed": 0,
+        "errors": []
+    }
+
+    for raw in resources:
+        if not raw.get("resourceType"):
+            raw["resourceType"] = "Patient"
+
+        r_type = raw["resourceType"]
+        if not raw.get("id"):
+            if r_type == "Patient":
+                raw["id"] = generate_patient_id()
+            else:
+                raw["id"] = uuid.uuid4().hex
+        r_id = raw["id"]
+
+        # For Patient resources, hash the codice fiscale in identifier
+        if r_type == "Patient" and raw.get("identifier"):
+            for ident in raw["identifier"]:
+                ident["value"] = hash_identifier(ident["value"])
+
+
+        logger.info(f"[PROCESS] Inizio {r_type} (id={r_id})")
+
+        schema = JSON_SCHEMA_MAP.get(r_type)
+
+        if not schema:
+            msg = f"Tipo non supportato: {r_type}"
+            logger.warning(f"[PROCESS] {msg} (id={r_id})")
+            summary["errors"].append({
+                "id": r_id,
+                "resourceType": r_type,
+                "error": msg
+            })
+            continue
+
+        if db.query(FhirResource).filter(FhirResource.id == r_id).first():
+            warn = f"Risorsa duplicata saltata: {r_type} (id={r_id})"
+            logger.warning(warn)
+            summary["errors"].append({
+                "id": r_id,
+                "resourceType": r_type,
+                "error": warn
+            })
+            continue
+
+        try:
+            schema(**raw)
+            logger.info(f"[PROCESS] Validazione OK: {r_type} (id={r_id})")
+            db.add(FhirResource(id=r_id, resource_type=r_type, content=raw))
+            logger.info(f"[PROCESS] Aggiunto al DB: {r_type} (id={r_id})")
+            summary["processed"] += 1
+        except Exception as e:
+            logger.error(f"[PROCESS] Errore validazione/persistenza {r_type} (id={r_id}): {e}")
+            summary["errors"].append({
+                "id": r_id,
+                "resourceType": r_type,
+                "error": str(e)
+            })
+
+    # commit finale di tutte le risorse valide
+    db.commit()
+    return summary

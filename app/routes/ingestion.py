@@ -2,12 +2,12 @@
 import csv, io, logging
 import json
 
-from anyio.streams import file
-from fastapi import APIRouter, UploadFile, File, HTTPException, Depends
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Request
+from starlette import status
+
 from app.services.database import get_db_session, save_resource, save_encounter_if_valid
-from app.models.fhir_resource import FhirResource
 from app.auth.dependencies import require_role
+from app.utils.audit import log_audit_event
 from app.utils.transform import *
 
 router = APIRouter(tags=["Upload CSV/JSON"])
@@ -23,7 +23,7 @@ def upload_patient_csv(
 ):
     raw = file.file.read().decode("utf-8")
     reader = csv.DictReader(io.StringIO(raw))
-    if not validate_csv_headers(reader.fieldnames, EXPECTED_HEADERS["Patient"]):
+    if not validate_csv_headers(reader.fieldnames, "Patient"):
         raise HTTPException(status_code=400, detail="Intestazioni CSV non valide per risorsa Patient.")
 
     inserted, skipped, errors = 0, 0, []
@@ -229,3 +229,57 @@ def upload_condition_csv(
     return {"inserted": inserted, "skipped": skipped, "errors": errors}
 
 
+
+
+
+@router.post(
+    "/json/bulk",
+    status_code=status.HTTP_200_OK,
+    summary="Bulk upload JSON FHIR misto"
+)
+async def upload_json_bulk(
+    request: Request,
+    file: UploadFile = File(..., description="File .json contenente risorse FHIR"),
+    db: Session = Depends(get_db_session),
+    _: None = Depends(require_role("admin"))
+):
+    """
+    Riceve un file .json (singolo oggetto o array), valida e persiste
+    le risorse FHIR miste, e restituisce un report di inseriti/scartati.
+    """
+    raw = await file.read()
+    try:
+        payload = json.loads(raw)
+        resources = payload if isinstance(payload, list) else [payload]
+        # Debug: verifica risorse ricevute
+        logger.info(f"[JSON BULK] Ricevute {len(resources)} risorse JSON")
+        for r in resources:
+            logger.info(f"[JSON BULK] → risorsa id={r.get('id')} type={r.get('resourceType')}")
+
+    except json.JSONDecodeError as e:
+        raise HTTPException(status_code=400, detail=f"JSON non valido: {e.msg}")
+
+    # Debug: verifica risorse ricevute
+    logger.info(f"[JSON BULK] Ricevute {len(resources)} risorse JSON")
+    for r in resources:
+        logger.info(f"[JSON BULK] → risorsa id={r.get('id')} type={r.get('resourceType')}")
+
+    # Processo le risorse
+    report = process_json_resources(resources, db)
+
+    # Audit batch JSON
+    log_audit_event(
+        event_type="120301",
+        username=request.session.get("username", "anon"),
+        success=(len(report["errors"]) == 0),
+        ip=request.client.host,
+        action="C",
+        entity_type="BatchJSONIngest"
+    )
+
+    # Risposta per il front-end
+    return {
+        "inserted": report["processed"],
+        "skipped": len(report["errors"]),
+        "errors": [f"[{e['resourceType']}/{e['id']}] {e['error']}" for e in report["errors"]]
+    }

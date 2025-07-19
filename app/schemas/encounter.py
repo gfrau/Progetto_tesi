@@ -10,3 +10,6 @@ class EncounterRead(BaseModel):
     subject: Optional[Dict[str, Any]] = None
     period: Optional[Dict[str, Any]] = None
     identifier: Optional[List[Dict[str, str]]] = None
+
+class EncounterCreate(BaseModel):
+    pass
