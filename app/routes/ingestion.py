@@ -1,10 +1,8 @@
 
-import csv, io, logging
-import json
+import csv, io, json
 
 from fastapi import APIRouter, UploadFile, File, HTTPException, Depends, Request
 from starlette import status
-
 from app.services.database import get_db_session, save_resource, save_encounter_if_valid
 from app.auth.dependencies import require_role
 from app.utils.audit import log_audit_event

@@ -1,33 +1,57 @@
-<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm px-3">
+<nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm px-3 py-2 sticky-top">
   <div class="container-fluid">
-    <a class="navbar-brand" href="/home">FHIR Platform</a>
-    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav"
-      aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+    <!-- Brand / logo -->
+    <a class="navbar-brand d-flex align-items-center gap-2" href="/home">
+      <i class="bi bi-capsule-pill fs-4 text-primary"></i>
+      <span class="fw-semibold">FHIR&nbsp;Platform</span>
+    </a>
+
+    <!-- Mobile toggler -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
 
+    <!-- Collapsible content -->
     <div class="collapse navbar-collapse" id="navbarNav">
-      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-lg-2">
         {% if request.session.get('role') == 'admin' %}
-        <li class="nav-item me-3">
-          <a class="nav-link {% if page == 'home' %}active{% endif %}" href="/home">Home</a>
+        <li class="nav-item">
+          <a class="nav-link d-flex align-items-center gap-1 {% if page == 'home' %}active fw-semibold{% endif %}" href="/home">
+            <i class="bi bi-house-door"></i><span>Home</span>
+          </a>
         </li>
-        <li class="nav-item me-3">
-          <a class="nav-link {% if page == 'upload' %}active{% endif %}" href="/upload">Upload</a>
+        <li class="nav-item">
+          <a class="nav-link d-flex align-items-center gap-1 {% if page == 'upload' %}active fw-semibold{% endif %}" href="/upload">
+            <i class="bi bi-cloud-upload"></i><span>Upload</span>
+          </a>
         </li>
         {% endif %}
-        <li class="nav-item me-3">
-          <a class="nav-link {% if page == 'dashboard' %}active{% endif %}" href="/dashboard">Dashboard</a>
+        <li class="nav-item">
+          <a class="nav-link d-flex align-items-center gap-1 {% if page == 'dashboard' %}active fw-semibold{% endif %}" href="/dashboard">
+            <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+          </a>
         </li>
-        <li class="nav-item me-3">
-          <a class="nav-link {% if page == 'test' %}active{% endif %}" href="/test">Test</a>
+        <li class="nav-item">
+          <a class="nav-link d-flex align-items-center gap-1 {% if page == 'test' %}active fw-semibold{% endif %}" href="/test">
+            <i class="bi bi-patch-check"></i><span>Test</span>
+          </a>
         </li>
       </ul>
 
-      <span class="navbar-text me-3">
-        Utente: <strong>{{ request.session.get('username', 'N/A') }}</strong> |
-        Ruolo: <strong>{{ request.session.get('role', 'N/A') }}</strong>      </span>
-      <a class="btn btn-outline-danger btn-sm" href="/logout">Logout</a>
+      <!-- User info & logout -->
+      <div class="d-flex align-items-center gap-3">
+        <span class="navbar-text small text-secondary">
+          <i class="bi bi-person-circle me-1"></i>{{ request.session.get('username', 'N/A') }}
+          <span class="text-muted">&nbsp;|&nbsp;</span>
+          <i class="bi bi-shield-lock me-1"></i>{{ request.session.get('role', 'N/A') }}
+        </span>
+        <a class="btn btn-sm btn-outline-danger d-flex align-items-center gap-1" href="/logout">
+          <i class="bi bi-box-arrow-right"></i><span>Logout</span>
+        </a>
+      </div>
     </div>
   </div>
 </nav>
+
+<!-- Bootstrap Icons (ensure included) -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">

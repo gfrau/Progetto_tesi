@@ -1,17 +1,27 @@
 import datetime
+import json
+import re
 from typing import List
 
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
+from app.auth.dependencies import require_role
 from app.services.database import get_db_session
 from app.models.fhir_resource import FhirResource
 from app.models.loinc import LOINCCodes
 from app.schemas.loinc import LOINCCodeOut
-
+from app.utils.transform import process_json_resources
 
 router = APIRouter(tags=["Test"])
+
+
+LOINC_PATTERN = re.compile(r"^\d{3,6}-\d$")
+
+def is_valid_loinc_code(code: str) -> bool:
+    """Ritorna True se 'code' rispetta il pattern numerico LOINC."""
+    return bool(LOINC_PATTERN.match(code))
 
 @router.get("/duplicates")
 def test_duplicates(db: Session = Depends(get_db_session)):
@@ -90,6 +100,7 @@ def test_observation_links(db: Session = Depends(get_db_session)):
 
     return {"status": "ok", "broken_count": len(broken), "broken_links": broken}
 
+
 @router.get("/observation-loinc")
 def test_observation_loinc(db: Session = Depends(get_db_session)):
     """
@@ -108,6 +119,51 @@ def test_observation_loinc(db: Session = Depends(get_db_session)):
             invalid.append({"id": obs_id, "code": code})
     return {"invalid_count": len(invalid), "invalid_codes": invalid}
 
-@router.get("/loinc-codes", response_model=List[LOINCCodeOut])
-def list_loinc_codes(db: Session = Depends(get_db_session)):
-    return db.query(LOINCCodes).all()
+
+
+@router.post("/load-data-examples")
+def load_examples(
+    db: Session = Depends(get_db_session),
+    _: None = Depends(require_role("admin"))
+):
+    from pathlib import Path
+    """
+    Carica 4 file JSON in /data e li inserisce in blocco nel DB FHIR.
+    File attesi:
+      - patients_example.json      (Patient[])
+      - encounter_example.json     (Encounter[])
+      - observation_example.json   (Observation[])
+      - condition_example.json     (Condition[])
+    Ritorna un report { total, processed, errors, missing_files }.
+    """
+    base = Path("data/test/")
+    mapping = {
+        "Patient":     "patients_example.json",
+        "Encounter":   "encounters_example.json",
+        "Observation": "observations_example.json",
+        "Condition":   "conditions_example.json",
+    }
+
+    resources, missing = [], []
+    for r_type, fname in mapping.items():
+        fp = base / fname
+        if not fp.exists():
+            missing.append(fname)
+            continue
+        try:
+            data = json.loads(fp.read_text(encoding="utf-8"))
+        except json.JSONDecodeError as e:
+            raise HTTPException(status_code=400,
+                detail=f"JSON non valido in {fname}: {e}")
+        # accetta sia array che singolo oggetto
+        if isinstance(data, dict):
+            data = [data]
+        resources.extend(data)
+
+    if not resources:
+        raise HTTPException(status_code=400,
+            detail="Nessun file JSON trovato o vuoto")
+
+    report = process_json_resources(resources, db)
+    report["missing_files"] = missing
+    return report

@@ -1,3 +1,4 @@
+
 function showToast(message, type = "primary") {
   const bootstrapColors = {
     primary: "#0d6efd",   // blu
@@ -10,9 +11,9 @@ function showToast(message, type = "primary") {
   };
 
   const textColors = {
-    light: "#000",  // testo scuro su sfondo chiaro
+    light: "#000",
     warning: "#000",
-    default: "#fff" // testo bianco su sfondo scuro
+    default: "#fff"
   };
 
   const textColor = textColors[type] || textColors.default;
@@ -272,3 +273,56 @@ function loadTestData(resourceType) {
         `<tr><td colspan="6" class="text-danger">Errore durante il caricamento dei dati</td></tr>`;
     });
 }
+
+
+
+const busyLayer = document.getElementById('busyLayer');
+
+const busy = {
+  on() {
+    busyLayer.classList.remove('d-none');
+  },
+  off() {
+    busyLayer.classList.add('d-none');
+  }
+};
+
+function showToast(msg, type) {
+  Toastify({
+    text: msg,
+    className: type,
+    duration: 3000,
+    gravity: 'top',
+    position: 'center'
+  }).showToast();
+}
+
+function loadFixtures() {
+  busy.on();
+  fetch('/api/test/load-data-examples', { method: 'POST' })
+    .then(r => {
+      if (!r.ok) throw r;
+      return r.json();
+    })
+    .then(d => {
+      showToast(`Inserite ${d.processed}/${d.total} risorse`, 'success');
+      loadTestData('patients');
+    })
+    .catch(() => showToast('Errore durante il caricamento', 'danger'))
+    .finally(() => busy.off());
+}
+
+function resetDb() {
+  if (!confirm('Cancella tutti i dati?')) return;
+  busy.on();
+  fetch('/api/test-db/reset', { method: 'DELETE' })
+    .then(r => {
+      if (!r.ok) throw r;
+      return r.json();
+    })
+    .then(d => showToast(`Cancellati ${d.deleted_count} record`, 'success'))
+    .catch(() => showToast('Errore durante il reset', 'danger'))
+    .finally(() => busy.off());
+}
+
+document.addEventListener('DOMContentLoaded', () => busy.off());

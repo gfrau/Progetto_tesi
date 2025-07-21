@@ -3,74 +3,74 @@
 {% block title %}Upload Dati FHIR{% endblock %}
 
 {% block content %}
-<div class="container my-5">
-  <h2 class="text-center mb-4">Caricamento Dati FHIR</h2>
+<div class="container py-5 max-w-screen-lg">
+  <h1 class="text-center font-semibold text-3xl mb-6">Caricamento Dati FHIR</h1>
 
-  <div class="row justify-content-center">
-    <div class="col-md-8">
-
-
-      <!-- CSV Section -->
-      <div class="card shadow-sm mb-5">
-        <div class="card-body">
-          <h5 class="card-title">Upload da CSV</h5>
-
-          <!-- Patient CSV -->
-          <form id="patientCsvForm" enctype="multipart/form-data" class="mb-3">
-            <div class="input-group">
-              <input type="file" name="file" accept=".csv" required class="form-control">
-              <button type="submit" class="btn btn-primary upload-btn w-25">Upload Pazienti</button>
-            </div>
-          </form>
-
-          <!-- Encounter CSV -->
-          <form id="encounterCsvForm" enctype="multipart/form-data" class="mb-3">
-            <div class="input-group">
-              <input type="file" name="file" accept=".csv" required class="form-control">
-              <button type="submit" class="btn btn-success upload-btn w-25">Upload Encounter</button>
-            </div>
-          </form>
-
-          <!-- Observation CSV -->
-          <form id="observationCsvForm" enctype="multipart/form-data">
-            <div class="input-group">
-              <input type="file" name="file" accept=".csv" required class="form-control">
-              <button type="submit" class="btn btn-warning text-white upload-btn w-25">Upload Observation</button>
-            </div>
-          </form>
-
-          <!-- Condition CSV -->
-          <form id="conditionCsvForm" enctype="multipart/form-data" class="mb-3">
-            <div class="input-group">
-              <input type="file" name="file" accept=".csv" required class="form-control">
-              <button type="submit" class="btn btn-primary upload-btn w-25">Upload Condition</button>
-            </div>
-          </form>
-
-        </div>
+  <div class="grid gap-6 lg:grid-cols-2">
+    <div class="card shadow-sm">
+      <div class="card-header bg-light fw-semibold">
+        <i class="bi bi-filetype-csv me-2"></i>Upload da CSV
       </div>
-
-      <!-- JSON Section -->
-      <div class="card shadow-sm mb-4">
-        <div class="card-body">
-          <h5 class="card-title">Upload da JSON</h5>
-
-          <!-- Upload JSON -->
-        <form id="genericJsonForm" enctype="multipart/form-data" class="mb-3">
+      <div class="card-body">
+        <!-- Pazienti -->
+        <form id="patientCsvForm" class="mb-3" enctype="multipart/form-data">
+          <label class="form-label fw-semibold">Pazienti</label>
           <div class="input-group">
-            <input type="file" name="file" accept=".json" required class="form-control">
-            <button type="submit" class="btn btn-primary upload-btn w-25">Upload</button>
+            <span class="input-group-text bg-primary text-white"><i class="bi bi-person-fill"></i></span>
+            <input type="file" name="file" accept=".csv" required class="form-control">
+            <button type="submit" class="btn btn-primary"><i class="bi bi-upload me-1"></i>Upload</button>
+          </div>
+        </form>
+        <!-- Encounter -->
+        <form id="encounterCsvForm" class="mb-3" enctype="multipart/form-data">
+          <label class="form-label fw-semibold">Encounter</label>
+          <div class="input-group">
+            <span class="input-group-text bg-success text-white"><i class="bi bi-calendar-check-fill"></i></span>
+            <input type="file" name="file" accept=".csv" required class="form-control">
+            <button type="submit" class="btn btn-success"><i class="bi bi-upload me-1"></i>Upload</button>
+          </div>
+        </form>
+        <!-- Observation -->
+        <form id="observationCsvForm" class="mb-3" enctype="multipart/form-data">
+          <label class="form-label fw-semibold">Observation</label>
+          <div class="input-group">
+            <span class="input-group-text bg-warning text-white"><i class="bi bi-activity"></i></span>
+            <input type="file" name="file" accept=".csv" required class="form-control">
+            <button type="submit" class="btn btn-warning text-white"><i class="bi bi-upload me-1"></i>Upload</button>
+          </div>
+        </form>
+        <!-- Condition -->
+        <form id="conditionCsvForm" enctype="multipart/form-data">
+          <label class="form-label fw-semibold">Condition</label>
+          <div class="input-group">
+            <span class="input-group-text bg-danger text-white"><i class="bi bi-clipboard-pulse"></i></span>
+            <input type="file" name="file" accept=".csv" required class="form-control">
+            <button type="submit" class="btn btn-danger"><i class="bi bi-upload me-1"></i>Upload</button>
           </div>
         </form>
       </div>
+    </div>
 
+    <div class="card shadow-sm">
+      <div class="card-header bg-light fw-semibold">
+        <i class="bi bi-filetype-json me-2"></i>Upload da JSON
+      </div>
+      <div class="card-body">
+        <form id="genericJsonForm" enctype="multipart/form-data">
+          <label class="form-label fw-semibold">Seleziona file JSON</label>
+          <div class="input-group">
+            <span class="input-group-text bg-info text-white"><i class="bi bi-file-earmark-code-fill"></i></span>
+            <input type="file" name="file" accept=".json" required class="form-control">
+            <button type="submit" class="btn btn-info text-white"><i class="bi bi-upload me-1"></i>Upload</button>
+          </div>
+        </form>
+      </div>
     </div>
   </div>
 </div>
 
-<!-- Toastify -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
 <script src="{{ url_for('static', path='js/upload.js') }}"></script>
 {% endblock %}
-</div>

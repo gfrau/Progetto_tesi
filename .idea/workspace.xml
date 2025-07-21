@@ -5,25 +5,21 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="73a2d709-0896-4b80-ad05-861ea87787af" name="Changes" comment="grafica e logica aggiornata">
-      <change afterPath="$PROJECT_DIR$/app/models/dashboard.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/models/icd_code.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/app/schemas/dashboard.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/logs/audit.ndjson" beforeDir="false" afterPath="$PROJECT_DIR$/app/logs/audit.ndjson" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/main.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/models/loinc.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/models/loinc.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routes/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routes/dashboard.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/dashboard.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routes/loinc.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/DEL_loinc.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routes/stats.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/dashboard_api.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/ingestion.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/ingestion.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/routes/test.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/routes/test_db.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/test_db.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/schemas/loinc.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/loinc.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/utils/transform.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/utils/transform.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/css/style.css" beforeDir="false" afterPath="$PROJECT_DIR$/static/css/style.css" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/js/dashboard.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/dashboard.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/schemas/condition.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/schemas/condition.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/static/js/test.js" beforeDir="false" afterPath="$PROJECT_DIR$/static/js/test.js" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/templates/dashboard.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/dashboard.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/footer.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/footer.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/home.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/login.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/login.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/partials/dashboard_charts.html" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/partials/navbar.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/partials/navbar.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/test.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/test.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/templates/upload.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/upload.html" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -181,7 +177,7 @@
       <workItem from="1752846387847" duration="24653000" />
       <workItem from="1752910883881" duration="13999000" />
       <workItem from="1752997682634" duration="31871000" />
-      <workItem from="1753090002313" duration="1710000" />
+      <workItem from="1753090002313" duration="17461000" />
     </task>
     <task id="LOCAL-00001" summary="grafica e logica aggiornata">
       <option name="closed" value="true" />

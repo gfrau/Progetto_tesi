@@ -1,66 +1,114 @@
 {% extends "base.html" %}
 
-{% block title %}Test{% endblock %}
+{% block title %}Test dati FHIR{% endblock %}
 
 {% block content %}
-<div class="card shadow-sm">
-  <div class="card-body">
-    <h1 class="card-title text-center mb-4">Verifica integrità dei dati</h1>
-    <p class="card-text text-center text-muted mb-4">
-      Esegui i test automatici per verificare la coerenza delle risorse FHIR importate.
-    </p>
+<div class="container py-5 max-w-screen-lg">
+  <h1 class="text-center mb-2 fw-semibold text-3xl">Verifica integrità dei dati</h1>
+  <p class="text-center text-muted mb-5">Esegui i test automatici per assicurarti che le risorse FHIR importate siano coerenti.</p>
 
-    <div class="row gy-4">
 
-      <div class="col-md-6">
-        <div class="border rounded p-3 h-100">
-          <h5 class="mb-2">Test Encounter → Pazienti</h5>
-          <p class="text-muted small">Verifica che ogni Encounter sia collegato a un paziente esistente.</p>
-          <button class="btn btn-primary w-100" onclick="checkEncounters()">Esegui test</button>
+  <div class="row g-4">
+    <div class="col-md-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-body d-flex flex-column justify-content-between">
+          <div>
+            <h5 class="card-title d-flex align-items-center gap-2 mb-1">
+              <i class="bi bi-link-45deg text-primary fs-4"></i>Encounter → Pazienti
+            </h5>
+            <p class="text-muted small mb-4">Cada Encounter deve essere collegato a un paziente esistente.</p>
+          </div>
+          <button class="btn btn-primary w-100" onclick="checkEncounters()">
+            <i class="bi bi-play-fill me-1"></i>Esegui test
+          </button>
         </div>
       </div>
+    </div>
 
-      <div class="col-md-6">
-        <div class="border rounded p-3 h-100">
-          <h5 class="mb-2">Test Observation → Pazienti</h5>
-          <p class="text-muted small">Verifica che tutte le Observation facciano riferimento a un paziente valido.</p>
-          <button class="btn btn-success w-100" onclick="checkObservations()">Esegui test</button>
+    <div class="col-md-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-body d-flex flex-column justify-content-between">
+          <div>
+            <h5 class="card-title d-flex align-items-center gap-2 mb-1">
+              <i class="bi bi-activity text-success fs-4"></i>Observation → Pazienti
+            </h5>
+            <p class="text-muted small mb-4">Ogni Observation deve riferirsi a un paziente valido.</p>
+          </div>
+          <button class="btn btn-success w-100" onclick="checkObservations()">
+            <i class="bi bi-play-fill me-1"></i>Esegui test
+          </button>
         </div>
       </div>
+    </div>
 
-      <div class="col-md-6">
-        <div class="border rounded p-3 h-100">
-          <h5 class="mb-2">Test Duplicati Pazienti</h5>
-          <p class="text-muted small">Rileva pazienti duplicati in base all'identificativo (hash del codice fiscale).</p>
-          <button class="btn btn-warning w-100" onclick="checkDuplicates()">Esegui test</button>
+    <!-- Duplicati pazienti -->
+    <div class="col-md-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-body d-flex flex-column justify-content-between">
+          <div>
+            <h5 class="card-title d-flex align-items-center gap-2 mb-1">
+              <i class="bi bi-person-fill-x text-warning fs-4"></i>Duplicati Pazienti
+            </h5>
+            <p class="text-muted small mb-4">Rileva pazienti duplicati in base all'identificativo.</p>
+          </div>
+          <button class="btn btn-warning text-white w-100" onclick="checkDuplicates()">
+            <i class="bi bi-play-fill me-1"></i>Esegui test
+          </button>
         </div>
       </div>
+    </div>
 
-      <div class="col-md-6">
-        <div class="border rounded p-3 h-100">
-          <h5 class="mb-2">Verifica codici LOINC</h5>
-          <p class="text-muted small">
-            Controlla che i codici LOINC siano nel formato numerico corretto (es: 1234-5).
-          </p>
-          <button class="btn btn-info w-100" onclick="checkObservationLoinc()">Esegui test</button>
+    <!-- Codici LOINC -->
+    <div class="col-md-6">
+      <div class="card shadow-sm h-100">
+        <div class="card-body d-flex flex-column justify-content-between">
+          <div>
+            <h5 class="card-title d-flex align-items-center gap-2 mb-1">
+              <i class="bi bi-file-earmark-check-fill text-info fs-4"></i>Verifica codici LOINC
+            </h5>
+            <p class="text-muted small mb-4">Controlla che i codici LOINC rispettino il formato numerico corretto.</p>
+          </div>
+          <button class="btn btn-info text-white w-100" onclick="checkObservationLoinc()">
+            <i class="bi bi-play-fill me-1"></i>Esegui test
+          </button>
         </div>
       </div>
+    </div>
+  </div>
 
-      <div class="row mt-4">
-  <div class="col-md-12">
-    <div class="border rounded p-3">
-      <h5 class="mb-2">Visualizza dati importati</h5>
-      <p class="text-muted small">Consulta i dati attualmente presenti nel database (pazienti, encounter, observation).</p>
+  {% if request.session.get('role') == 'admin' %}
+  <h2 class="h5 fw-semibold mt-5">Dati di esempio</h2>
+  <p class="text-muted small mb-3">Popola o azzera rapidamente il database.</p>
+
+  <div class="row g-2 mb-4">
+    <div class="col-12 col-md-6">
+      <button id="fixturesBtn" class="btn btn-success w-100 d-flex align-items-center justify-content-center gap-2" onclick="loadFixtures()">
+        <i class="bi bi-cloud-arrow-up-fill fs-5"></i><span>Popola database</span>
+      </button>
+    </div>
+    <div class="col-12 col-md-6">
+      <button id="resetBtn" class="btn btn-outline-danger w-100 d-flex align-items-center justify-content-center gap-2" onclick="resetDb()">
+        <i class="bi bi-trash3-fill fs-5"></i><span>Reset DB</span>
+      </button>
+    </div>
+  </div>
+{% endif %}
+
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h5 class="card-title mb-3 d-flex align-items-center gap-2">
+        <i class="bi bi-table"></i>Visualizza dati importati
+      </h5>
 
       <div class="btn-group mb-3" role="group">
-        <button class="btn btn-outline-primary" onclick="loadTestData('patients')">Pazienti</button>
+        <button class="btn btn-outline-primary"   onclick="loadTestData('patients')">Pazienti</button>
         <button class="btn btn-outline-secondary" onclick="loadTestData('encounters')">Encounter</button>
-        <button class="btn btn-outline-success" onclick="loadTestData('observations')">Observation</button>
-        <button class="btn btn-outline-success" onclick="loadTestData('conditions')">Condition</button>
+        <button class="btn btn-outline-success"   onclick="loadTestData('observations')">Observation</button>
+        <button class="btn btn-outline-info"      onclick="loadTestData('conditions')">Condition</button>
       </div>
 
-      <div id="data-table-container" class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-        <table class="table table-sm table-striped">
+      <div id="data-table-container" class="table-responsive" style="max-height:400px;overflow-y:auto;">
+        <table class="table table-sm table-striped mb-0">
           <thead id="data-table-head"></thead>
           <tbody id="data-table-body"></tbody>
         </table>
@@ -70,13 +118,15 @@
 </div>
 
 
-    </div>
+<div id="busyLayer" class="position-fixed top-0 start-0 w-100 h-100 d-none" style="background:rgba(0,0,0,.35);z-index:2000;">
+  <div class="d-flex h-100 justify-content-center align-items-center">
+    <div class="spinner-border text-light" role="status" style="width:4rem;height:4rem;"></div>
   </div>
 </div>
-<!-- Altre librerie -->
+
+<!-- Icons & toast -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-
-<!-- Il tuo JS -->
-<script src="/static/js/test.js"></script>
+<script src="{{ url_for('static', path='js/test.js') }}"></script>
 {% endblock %}

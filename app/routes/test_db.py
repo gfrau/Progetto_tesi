@@ -2,10 +2,14 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy.exc import SQLAlchemyError
 
+from app.auth.dependencies import require_role
 from app.services.database import get_db_session, reset_database
 from app.models.fhir_resource import FhirResource
 
 router = APIRouter(prefix="/test-db", tags=["Test-db"])
+
+
+
 
 @router.get("/ping", response_model=dict)
 def ping_db(db: Session = Depends(get_db_session)):
@@ -19,7 +23,11 @@ def ping_db(db: Session = Depends(get_db_session)):
     except SQLAlchemyError:
         raise HTTPException(status_code=500, detail="Database connection failed")
 
-@router.delete("/reset", response_model=dict)
+@router.delete(
+    "/reset",
+    response_model=dict,
+    dependencies=[Depends(require_role("admin"))]
+)
 def reset_db(db: Session = Depends(get_db_session)):
     """
     Endpoint di test: reset della tabella fhir_resources.
