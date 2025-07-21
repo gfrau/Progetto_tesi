@@ -22,11 +22,11 @@ from app.routes import (
     observation,
     condition,
     dashboard,
-    loinc,
+    DEL_loinc,
     maintenance,
     test_db,
     auth,
-    stats,
+    dashboard_api,
     frontend,
     template,
     test,
@@ -70,11 +70,12 @@ app.include_router(observation.router, prefix="/api")
 app.include_router(condition.router, prefix="/api")
 
 app.include_router(ingestion.router, prefix="/api")
-app.include_router(loinc.router, prefix="/api")
+app.include_router(DEL_loinc.router, prefix="/api")
 app.include_router(maintenance.router, prefix="/api")
 app.include_router(test_db.router, prefix="/api")
-app.include_router(stats.router, prefix="/api")
+app.include_router(dashboard_api.router, prefix="/api")
 app.include_router(test.router, prefix="/api/test")
+
 
 @app.get("/", response_class=HTMLResponse)
 def read_root(request: Request):

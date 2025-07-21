@@ -49,3 +49,11 @@
   max-width: 180px;
 }
 
+.card-fixed-460 {        /* nome a tua scelta */
+  min-height: 460px;     /* su desktop */
+  overflow  : hidden;
+}
+
+@media (max-width: 767.98px) {      /* opz.: compatta su mobile */
+  .card-fixed-460 { min-height: 360px; }
+}

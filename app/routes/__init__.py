@@ -4,11 +4,11 @@ from . import (
     observation,
     condition,
     dashboard,
-    loinc,
+    DEL_loinc,
     maintenance,
     test_db,
     auth,
-    stats,
+    dashboard_api,
     template
 )
 

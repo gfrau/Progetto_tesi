@@ -1,13 +1,17 @@
 import datetime
+from typing import List
+
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.orm import Session
 from sqlalchemy import func
 
 from app.services.database import get_db_session
 from app.models.fhir_resource import FhirResource
-#from app.utils.transform import is_valid_loinc_code
+from app.models.loinc import LOINCCodes
+from app.schemas.loinc import LOINCCodeOut
 
-router = APIRouter(tags=["test"])
+
+router = APIRouter(tags=["Test"])
 
 @router.get("/duplicates")
 def test_duplicates(db: Session = Depends(get_db_session)):
@@ -103,3 +107,7 @@ def test_observation_loinc(db: Session = Depends(get_db_session)):
             obs_id = row.content.get("identifier", [{}])[0].get("value")
             invalid.append({"id": obs_id, "code": code})
     return {"invalid_count": len(invalid), "invalid_codes": invalid}
+
+@router.get("/loinc-codes", response_model=List[LOINCCodeOut])
+def list_loinc_codes(db: Session = Depends(get_db_session)):
+    return db.query(LOINCCodes).all()

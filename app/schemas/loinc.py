@@ -1,4 +1,4 @@
-# schemas/loinc.py
+# schemas/DEL_loinc.py
 
 from pydantic import BaseModel, Field
 from typing import Literal

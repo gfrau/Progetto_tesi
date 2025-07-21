@@ -202,10 +202,10 @@ function renderTable(data) {
     ],
     "Encounter": [
       "resourceType", "id", "status", "class_fhir.coding.0.code",
-      "period.start", "peraiiod.end", "subject.identifier.value"
+      "period.start", "period.end", "subject.identifier.value"
     ],
     "Observation": [
-      "resourceType", "id", "code.coding.0.display", "code.coding.0.code",
+      "resourceType", "id", "code.coding.0.display",
       "valueQuantity.value", "valueQuantity.unit", "effectiveDateTime", "subject.identifier.value"
     ],
     "Condition": [

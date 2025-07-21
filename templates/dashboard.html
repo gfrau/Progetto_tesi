@@ -4,77 +4,175 @@
 
 {% block content %}
 <div class="container mt-4">
+  <!-- Header -->
   <div class="text-center mb-4">
     <h2 class="fw-bold">Dashboard epidemiologica</h2>
     <p class="text-muted">Visualizza i principali indicatori e grafici</p>
   </div>
 
+  <!-- KPI Cards -->
   <div class="row text-center mb-5">
-    <div class="col-md-4 mb-4">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h3 id="kpiPatients" class="fw-bold text-primary">--</h3>
+    <div class="col-6 col-md-3 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body d-flex flex-column justify-content-center">
+          <h3 id="kpiPatients" class="fw-bold text-primary mb-1">--</h3>
           <p class="mb-0">Pazienti</p>
         </div>
       </div>
     </div>
-    <div class="col-md-4 mb-3">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h3 id="kpiIncontri" class="fw-bold text-success">--</h3>
+    <div class="col-6 col-md-3 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body d-flex flex-column justify-content-center">
+          <h3 id="kpiIncontri" class="fw-bold text-success mb-1">--</h3>
           <p class="mb-0">Ricoveri</p>
         </div>
       </div>
     </div>
-    <div class="col-md-4 mb-3">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h3 id="kpiParametri" class="fw-bold text-warning">--</h3>
+    <div class="col-6 col-md-3 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body d-flex flex-column justify-content-center">
+          <h3 id="kpiParametri" class="fw-bold text-warning mb-1">--</h3>
           <p class="mb-0">Parametri clinici</p>
         </div>
       </div>
     </div>
-
-    <div class="col-md-4 mb-3">
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <h3 id="kpiCondizioni" class="fw-bold text-warning">--</h3>
+    <div class="col-6 col-md-3 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-body d-flex flex-column justify-content-center">
+          <h3 id="kpiCondizioni" class="fw-bold text-info mb-1">--</h3>
           <p class="mb-0">Condizioni</p>
         </div>
       </div>
     </div>
+  </div>
 
-  <div class="row">
-    <div class="col-md-6 mb-4">
-      <div class="card shadow-sm">
-        <div class="card-header bg-light fw-semibold">Grafico 1</div>
-        <div class="card-body">
-          <select id="aggregationField1" class="form-select mb-3">
-            <option value="gender">Genere</option>
-            <option value="code">Codice LOINC</option>
-            <option value="status">Stato Encounter</option>
-            <option value="age_group">Fasce di età</option>
-          </select>
-          <canvas id="chart1"></canvas>
+<!-- ▸▸▸ Grafici a selezione (demografia + clinica) ------------------------ -->
+<div class="row g-4 mb-4">
+  <!-- Grafico 1 : Demografia -->
+  <div class="col-md-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header py-2 text-center fw-semibold bg-light">
+        Distribuzione Demografica
+      </div>
+
+      <div class="card-body p-2 d-flex flex-column" style="height:300px">
+        <!-- combo -->
+        <select id="aggregationField1"
+                class="form-select form-select-sm mb-2 align-self-center"
+                style="max-width:300px">
+          <option value="gender">Genere</option>
+          <option value="age_group">Fasce di età</option>
+        </select>
+
+        <!-- wrapper che centra il canvas -->
+        <div class="flex-fill d-flex align-items-center justify-content-center">
+          <canvas id="chart1" class="w-100" style="max-width:220px;max-height:220px"></canvas>
         </div>
       </div>
     </div>
-    <div class="col-md-6 mb-4">
-      <div class="card shadow-sm">
-        <div class="card-header bg-light fw-semibold">Grafico 2</div>
-        <div class="card-body">
-          <select id="aggregationField2" class="form-select mb-3">
-            <option value="gender">Genere</option>
-            <option value="code">Codice LOINC</option>
-            <option value="status">Stato Encounter</option>
-            <option value="age_group">Fasce di età</option>
-          </select>
-          <canvas id="chart2"></canvas>
+  </div>
+
+  <!-- Grafico 2 : Clinica -->
+  <div class="col-md-6">
+    <div class="card shadow-sm h-100">
+      <div class="card-header py-2 text-center fw-semibold bg-light">
+        Distribuzione Clinica
+      </div>
+
+      <div class="card-body p-2 d-flex flex-column" style="height:300px">
+        <select id="aggregationField2"
+                class="form-select form-select-sm mb-2 align-self-center"
+                style="max-width:200px">
+          <option value="status">Stato Encounter</option>
+          <option value="code">Codice LOINC</option>
+        </select>
+
+        <div class="flex-fill d-flex align-items-center justify-content-center">
+          <canvas id="chart2" class="w-100" style="max-width:220px;max-height:220px"></canvas>
         </div>
       </div>
     </div>
   </div>
 </div>
+<!-- ▸▸▸ fine blocco -------------------------------------------------------- -->
+
+  <!-- Incidenza giornaliera & distribuzione per provincia -->
+  <div class="row mb-4">
+    <div class="col-md-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header py-2 bg-light fw-semibold">Incidenza Giornaliera Diagnosi</div>
+        <div class="card-body p-2 d-flex flex-column" style="height:300px">
+  <select id="incidencePeriod" class="form-select form-select-sm mb-2 align-self-start" style="max-width:140px">
+    <option value="7">Ultimi 7 giorni</option>
+    <option value="30" selected>Ultimi 30 giorni</option>
+    <option value="90">Ultimi 90 giorni</option>
+  </select>
+  <canvas id="chartIncidence" class="w-100 flex-fill"></canvas>
+</div>
+      </div>
+    </div>
+    <div class="col-md-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header py-2 bg-light fw-semibold">Pazienti per Provincia</div>
+        <div class="card-body p-2" style="height:300px">
+          <canvas id="chartProvince" class="w-100 h-100"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Confronto Incidenza Covid-19: Due Periodi -->
+  <div class="row mb-4">
+    <div class="col-12">
+      <div class="card shadow-sm h-100">
+        <div class="card-header py-2 bg-light fw-semibold">Confronto Incidenza Covid‑19: Due Periodi</div>
+        <div class="card-body p-2">
+          <!-- Controlli periodo -->
+          <div class="row g-2 align-items-end mb-2">
+            <div class="col-sm-6 col-md-3">
+              <label for="period1Start" class="form-label">Periodo 1 ‑ dal</label>
+              <input type="date" id="period1Start" class="form-control form-control-sm">
+            </div>
+            <div class="col-sm-6 col-md-3">
+              <label for="period1End" class="form-label">al</label>
+              <input type="date" id="period1End" class="form-control form-control-sm">
+            </div>
+            <div class="col-sm-6 col-md-3">
+              <label for="period2Start" class="form-label">Periodo 2 ‑ dal</label>
+              <input type="date" id="period2Start" class="form-control form-control-sm">
+            </div>
+            <div class="col-sm-6 col-md-3">
+              <label for="period2End" class="form-label">al</label>
+              <input type="date" id="period2End" class="form-control form-control-sm">
+            </div>
+          </div>
+          <div class="row g-2 mb-2">
+            <div class="col-md-4">
+              <label for="conditionSelect" class="form-label">Patologia (filtro futuro)</label>
+              <select id="conditionSelect" class="form-select form-select-sm" disabled>
+                <option value="U07.1">Covid‑19</option>
+              </select>
+            </div>
+            <div class="col-md-2 align-self-end">
+              <button id="btnPeriodCompare" class="btn btn-primary btn-sm w-100">Aggiorna</button>
+            </div>
+          </div>
+          <div class="card-body p-2 card-fixed-460">
+          <canvas id="chartPeriodCompare" style="height:320px" class="w-100"></canvas>
+          </div></div>
+      </div>
+    </div>
+  </div>
+</div> <!-- /container -->
+
+<!-- Librerie JS (ordine corretto) -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="/static/js/dashboard.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/date-fns@2.30.0/dist/date-fns.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>
+<script type="module" src="/static/js/dashboard.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/date-fns@2.30.0/dist/date-fns.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@3"></script>
+<script type="module" src="/static/js/dashboard.js"></script>
 {% endblock %}

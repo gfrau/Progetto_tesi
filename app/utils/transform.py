@@ -184,11 +184,11 @@ def csv_to_condition(row: dict) -> dict:
                     display="Active"
                 )]
             ),
-            verificationStatus = CodeableConcept(
-            coding=[Coding(
+            verificationStatus = CodeableConcept.construct(
+            coding=[
+                Coding.construct(
                 system="http://terminology.hl7.org/CodeSystem/condition-ver-status",
                 code="confirmed",
-                display="Confirmed"
                 )]
             ),
             code=CodeableConcept(
@@ -242,10 +242,37 @@ def process_json_resources(resources: list[dict], db: Session) -> dict:
                 raw["id"] = uuid.uuid4().hex
         r_id = raw["id"]
 
-        # For Patient resources, hash the codice fiscale in identifier
+        # Anonimizzazione: hash su tutti i subject.identifier.value (Patient e gli altri)
         if r_type == "Patient" and raw.get("identifier"):
+            # Patient può avere più identifier
             for ident in raw["identifier"]:
+                if ident.get("value"):
+                    ident["value"] = hash_identifier(ident["value"])
+
+        elif r_type in ("Encounter", "Observation", "Condition"):
+            # Tutti gli altri hanno subject.identifier come dict
+            subj = raw.get("subject", {})
+            ident = subj.get("identifier")
+            if isinstance(ident, dict) and ident.get("value"):
                 ident["value"] = hash_identifier(ident["value"])
+
+        if r_type == "Condition":
+            # clinicalStatus
+            cs = raw.get("clinicalStatus")
+            if isinstance(cs, str):
+                raw["clinicalStatus"] = {
+                    "coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+                                "code": cs, "display": cs.capitalize()}],
+                    "text": cs.capitalize()
+                }
+            # verificationStatus
+            vs = raw.get("verificationStatus")
+            if isinstance(vs, str):
+                raw["verificationStatus"] = {
+                    "coding": [{"system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+                                "code": vs, "display": vs.capitalize()}],
+                    "text": vs.capitalize()
+                }
 
 
         logger.info(f"[PROCESS] Inizio {r_type} (id={r_id})")

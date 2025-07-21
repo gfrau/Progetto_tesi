@@ -5,7 +5,7 @@ from sqlalchemy.exc import SQLAlchemyError
 from app.services.database import get_db_session, reset_database
 from app.models.fhir_resource import FhirResource
 
-router = APIRouter(prefix="/test-db", tags=["test-db"])
+router = APIRouter(prefix="/test-db", tags=["Test-db"])
 
 @router.get("/ping", response_model=dict)
 def ping_db(db: Session = Depends(get_db_session)):

@@ -1,4 +1,4 @@
-# app/models/loinc.py
+# app/models/DEL_loinc.py
 from sqlalchemy import Column, Integer, String
 from app.base import Base
 
