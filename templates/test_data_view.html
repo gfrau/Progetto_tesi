@@ -3,81 +3,128 @@
 <div class="container mt-4">
   <h3 class="mb-4">Visualizzazione dati attualmente presenti</h3>
 
-  <div class="mb-5">
-    <h5>Patient</h5>
-    <table class="table table-sm table-bordered">
-      <thead class="table-light">
-        <tr>
-          <th scope="col">Risorsa</th>
-          <th scope="col">ID Risorsa</th>
-          <th scope="col">Identificativo Paziente</th>
-          <th scope="col">Cognome</th>
-          <th scope="col">Nome</th>
-          <th scope="col">Data di Nascita</th>
-          <th scope="col">Sesso</th>
-          <th scope="col">Città</th>
-          <th scope="col">Provincia</th>
-          <th scope="col">CAP</th>
-        </tr>
-      </thead>
-      <tbody id="patient-data"></tbody>
-    </table>
+  <div class="row">
+    <!-- Patient Card -->
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-primary text-white d-flex align-items-center">
+          <i class="bi bi-person-fill me-2"></i>
+          <span>Patient</span>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table id="patient-table" class="table table-hover table-striped mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Risorsa</th>
+                  <th>ID Risorsa</th>
+                  <th>Identificativo Paziente</th>
+                  <th>Cognome</th>
+                  <th>Nome</th>
+                  <th>Data di Nascita</th>
+                  <th>Sesso</th>
+                  <th>Città</th>
+                  <th>Provincia</th>
+                  <th>CAP</th>
+                </tr>
+              </thead>
+              <tbody id="patient-data"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Encounter Card -->
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-success text-white d-flex align-items-center">
+          <i class="bi bi-journal-medical me-2"></i>
+          <span>Encounter</span>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table id="encounter-table" class="table table-hover table-striped mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>ID Risorsa</th>
+                  <th>Identifier</th>
+                  <th>Classe</th>
+                  <th>Patient</th>
+                  <th>Start</th>
+                  <th>End</th>
+                </tr>
+              </thead>
+              <tbody id="encounter-data"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="mb-5">
-    <h5>Encounter</h5>
-    <table class="table table-sm table-bordered">
-      <thead>
-        <tr>
-          <th>ID Risorsa</th>
-          <th>Identifier</th>
-          <th>Classe</th>
-          <th>Patient</th>
-          <th>Start</th>
-          <th>End</th>
-        </tr>
-      </thead>
-      <tbody id="encounter-data"></tbody>
-    </table>
+  <div class="row">
+    <!-- Observation Card -->
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-warning text-dark d-flex align-items-center">
+          <i class="bi bi-graph-up-arrow me-2"></i>
+          <span>Observation</span>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table id="observation-table" class="table table-hover table-striped mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Tipo</th>
+                  <th>ID Risorsa</th>
+                  <th>Status</th>
+                  <th>Data</th>
+                  <th>Subject</th>
+                  <th>Valore</th>
+                  <th>Unità</th>
+                </tr>
+              </thead>
+              <tbody id="observation-data"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Condition Card -->
+    <div class="col-lg-6 mb-4">
+      <div class="card shadow-sm h-100">
+        <div class="card-header bg-danger text-white d-flex align-items-center">
+          <i class="bi bi-exclamation-triangle-fill me-2"></i>
+          <span>Condition</span>
+        </div>
+        <div class="card-body p-0">
+          <div class="table-responsive">
+            <table id="condition-table" class="table table-hover table-striped mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>Tipo</th>
+                  <th>ID Risorsa</th>
+                  <th>Stato Clinico</th>
+                  <th>Data registrazione</th>
+                  <th>Subject</th>
+                  <th>Paziente</th>
+                  <th>Diagnosi</th>
+                </tr>
+              </thead>
+              <tbody id="condition-data"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="mb-5">
-    <h5>Observation</h5>
-    <table class="table table-sm table-bordered">
-      <thead>
-        <tr>
-          <th scope="col">Tipo</th>
-          <th scope="col">ID Risorsa</th>
-          <th scope="col">Status</th>
-          <th scope="col">Data</th>
-          <th scope="col">Subject</th>
-          <th scope="col">Valore</th>
-          <th scope="col">Unità</th>
-        </tr>
-      </thead>
-      <tbody id="observation-data"></tbody>
-    </table>
+  <div class="text-center mt-3">
+    <button class="btn btn-outline-primary" onclick="loadAllData()">
+      <i class="bi bi-arrow-repeat me-1"></i> Aggiorna dati
+    </button>
   </div>
-
-
-    <div class="mb-5">
-    <h5>Condition</h5>
-    <table class="table table-sm table-bordered">
-      <thead>
-        <tr>
-          <th scope="col">Tipo</th>
-          <th scope="col">ID Risorsa</th>
-          <th scope="col">Stato Clinico</th>
-          <th scope="col">Data registrazione</th>
-          <th scope="col">Subject</th>
-          <th scope="col">Paziente</th>
-          <th scope="col">Diagnosi</th>
-        </tr>
-      </thead>
-      <tbody id="condition-data"></tbody>
-    </table>
-  </div>
-
-  <button class="btn btn-primary" onclick="loadAllData()">Aggiorna dati</button>
 </div>
 {% endblock %}

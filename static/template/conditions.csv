@@ -1,0 +1,11 @@
+condition_id,codice_fiscale,codice_icd,descrizione,data_diagnosi
+COND0000,CFTEST00000XYZ,A01,Infezione intestinale,2023-01-01
+COND0001,CFTEST00001XYZ,A01,Infezione intestinale,2023-01-02
+COND0002,CFTEST00002XYZ,A01,Infezione intestinale,2023-01-03
+COND0003,CFTEST00003XYZ,A01,Infezione intestinale,2023-01-04
+COND0004,CFTEST00004XYZ,A01,Infezione intestinale,2023-01-05
+COND0005,CFTEST00005XYZ,A01,Infezione intestinale,2023-01-06
+COND0006,CFTEST00006XYZ,A01,Infezione intestinale,2023-01-07
+COND0007,CFTEST00007XYZ,A01,Infezione intestinale,2023-01-08
+COND0008,CFTEST00008XYZ,A01,Infezione intestinale,2023-01-09
+COND0009,CFTEST00009XYZ,A01,Infezione intestinale,2023-01-10

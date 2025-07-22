@@ -6,7 +6,7 @@ from app.auth.dependencies import require_role
 from app.schemas.loinc import LOINCCodeOut
 from app.utils.anonymization import anonymize_patient
 
-router = APIRouter()
+router = APIRouter(tags=["Test"])
 
 @router.post("/test/anonymize", dependencies=[Depends(require_role("admin"))], response_model=List[Dict])
 def test_anonymization(patients: List[Dict] = Body(...)):

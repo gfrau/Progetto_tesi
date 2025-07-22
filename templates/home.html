@@ -15,71 +15,94 @@
   </div>
 
 
-  <h2 class="h5 fw-semibold mb-3">Template CSV</h2>
-  <div class="row g-4 mb-5">
-    <div class="col-md-4">
-      <div class="card h-100 shadow-sm border-0">
-        <div class="card-body d-flex flex-column justify-content-between">
-          <div>
-            <h5 class="card-title d-flex align-items-center gap-2">
-              <i class="bi bi-person-fill text-primary"></i>Pazienti
-            </h5>
-            <p class="small text-muted">Template CSV per importare i pazienti.</p>
-          </div>
-          <a href="/static/template/patient.csv" class="btn btn-outline-primary w-100">
-            <i class="bi bi-download me-1"></i>Scarica template
-          </a>
+<h2 class="h5 fw-semibold mb-3">Template CSV</h2>
+<div class="row g-4 mb-5">
+  <!-- Pazienti -->
+  <div class="col-md-3">
+    <div class="card h-100 shadow-sm border-0">
+      <div class="card-body d-flex flex-column justify-content-between">
+        <div>
+          <h5 class="card-title d-flex align-items-center gap-2">
+            <i class="bi bi-person-fill text-primary"></i>Pazienti
+          </h5>
+          <p class="small text-muted">Template CSV per importare i pazienti.</p>
         </div>
-      </div>
-    </div>
-
-    <div class="col-md-4">
-      <div class="card h-100 shadow-sm border-0">
-        <div class="card-body d-flex flex-column justify-content-between">
-          <div>
-            <h5 class="card-title d-flex align-items-center gap-2">
-              <i class="bi bi-calendar-check-fill text-success"></i>Encounter
-            </h5>
-            <p class="small text-muted">Template CSV per importare i contatti clinici.</p>
-          </div>
-          <a href="/static/template/encounter_template.csv" class="btn btn-outline-success w-100">
-            <i class="bi bi-download me-1"></i>Scarica template
-          </a>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-4">
-      <div class="card h-100 shadow-sm border-0">
-        <div class="card-body d-flex flex-column justify-content-between">
-          <div>
-            <h5 class="card-title d-flex align-items-center gap-2">
-              <i class="bi bi-activity text-warning"></i>Observation
-            </h5>
-            <p class="small text-muted">Template CSV per caricare le osservazioni cliniche.</p>
-          </div>
-          <a href="/static/template/observation.csv" class="btn btn-outline-warning text-dark w-100">
-            <i class="bi bi-download me-1"></i>Scarica template
-          </a>
-        </div>
+        <a href="/static/template/patients.csv" class="btn btn-outline-primary w-100" download>
+          <i class="bi bi-download me-1"></i>Scarica template
+        </a>
       </div>
     </div>
   </div>
 
+  <!-- Ricoveri -->
+  <div class="col-md-3">
+    <div class="card h-100 shadow-sm border-0">
+      <div class="card-body d-flex flex-column justify-content-between">
+        <div>
+          <h5 class="card-title d-flex align-items-center gap-2">
+            <i class="bi bi-calendar-check-fill text-success"></i>Ricoveri
+          </h5>
+          <p class="small text-muted">Template CSV per importare i contatti clinici.</p>
+        </div>
+        <a href="/static/template/encounters.csv" class="btn btn-outline-success w-100" download>
+          <i class="bi bi-download me-1"></i>Scarica template
+        </a>
+      </div>
+    </div>
+  </div>
 
-  <h2 class="h5 fw-semibold mb-3">Esempi JSON</h2>
+  <!-- Osservazioni -->
+  <div class="col-md-3">
+    <div class="card h-100 shadow-sm border-0">
+      <div class="card-body d-flex flex-column justify-content-between">
+        <div>
+          <h5 class="card-title d-flex align-items-center gap-2">
+            <i class="bi bi-activity text-warning"></i>Osservazioni Cliniche
+          </h5>
+          <p class="small text-muted">Template CSV per caricare le osservazioni cliniche.</p>
+        </div>
+        <a href="/static/template/observations.csv" class="btn btn-outline-warning text-dark w-100" download>
+          <i class="bi bi-download me-1"></i>Scarica template
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Condizioni cliniche -->
+  <div class="col-md-3">
+    <div class="card h-100 shadow-sm border-0">
+      <div class="card-body d-flex flex-column justify-content-between">
+        <div>
+          <h5 class="card-title d-flex align-items-center gap-2">
+            <i class="bi bi-heart-pulse-fill text-danger"></i>Condizioni Cliniche
+          </h5>
+          <p class="small text-muted">Template CSV per caricare le condizioni cliniche.</p>
+        </div>
+        <a href="/static/template/conditions.csv" class="btn btn-outline-danger text-dark w-100" download>
+          <i class="bi bi-download me-1"></i>Scarica template
+        </a>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+  <h2 class="h5 fw-semibold mb-3">Template JSON</h2>
   <div class="card shadow-sm border-0 mb-4">
     <div class="card-body">
       <p class="text-muted small mb-3">Scarica risorse JSON di esempio per test o integrazione.</p>
       <div class="d-flex flex-wrap gap-2">
-        <a href="/static/template/patient.json" class="btn btn-outline-secondary d-flex align-items-center gap-1">
-          <i class="bi bi-filetype-json"></i>Patient
+        <a href="/static/template/patients.json" class="btn btn-outline-secondary d-flex align-items-center gap-1">
+          <i class="bi bi-filetype-json"></i>Pazienti
         </a>
-        <a href="/static/template/encounter.json" class="btn btn-outline-secondary d-flex align-items-center gap-1">
-          <i class="bi bi-filetype-json"></i>Encounter
+        <a href="/static/template/encounters.json" class="btn btn-outline-secondary d-flex align-items-center gap-1">
+          <i class="bi bi-filetype-json"></i>Ricoveri
         </a>
-        <a href="/static/template/observation.json" class="btn btn-outline-secondary d-flex align-items-center gap-1">
-          <i class="bi bi-filetype-json"></i>Observation
+        <a href="/static/template/observations.json" class="btn btn-outline-secondary d-flex align-items-center gap-1">
+          <i class="bi bi-filetype-json"></i>Osservazioni cliniche
+        </a>
+        <a href="/static/template/conditions.json" class="btn btn-outline-secondary d-flex align-items-center gap-1">
+          <i class="bi bi-filetype-json"></i>Condizioni cliniche
         </a>
       </div>
     </div>
