@@ -75,10 +75,10 @@ uvicorn main:app --reload
 
 ---
 
-## 🗂️ Struttura del database
+## Struttura del database
 
 Il database PostgreSQL utilizza colonne `JSONB` per salvare le risorse FHIR. 
-La tabella principale è fhirs_resource dove.
+La tabella principale è fhirs_resource dove vengono salvate le risorse in JsonB.
 
 ---
 
@@ -111,8 +111,7 @@ per consultare e testare le API REST generate automaticamente con FastAPI/OpenAP
 
 ## Licenza
 
-Questo progetto è ad uso accademico per la tesi magistrale di Gianluigi Frau.  
-Contiene codice open source modificabile per scopi educativi o di ricerca.
+Questo progetto è distribuito per scopi accademici. Tutti i diritti riservati all'autore.
 
 ---
 
