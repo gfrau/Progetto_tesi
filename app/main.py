@@ -23,7 +23,6 @@ from app.routes import (
     condition,
     dashboard,
     DEL_loinc,
-    maintenance,
     test_db,
     auth,
     dashboard_api,
@@ -71,7 +70,6 @@ app.include_router(condition.router, prefix="/api")
 
 app.include_router(ingestion.router, prefix="/api")
 app.include_router(DEL_loinc.router, prefix="/api")
-app.include_router(maintenance.router, prefix="/api")
 app.include_router(test_db.router, prefix="/api")
 app.include_router(dashboard_api.router, prefix="/api")
 app.include_router(test.router, prefix="/api/test")

@@ -7,18 +7,11 @@
     <list default="true" id="73a2d709-0896-4b80-ad05-861ea87787af" name="Changes" comment="grafica e logica aggiornata">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/app/logs/audit.ndjson" beforeDir="false" afterPath="$PROJECT_DIR$/app/logs/audit.ndjson" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/routes/maintenance.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/maintenance.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/template_encounter.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/template_observation.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/template_patient.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/template_unificato.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/templates/encounter.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/templates/observation.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/templates/patient.csv" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/static/templates/unified.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/footer.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/footer.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/home.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/home.html" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/templates/test_data_view.html" beforeDir="false" afterPath="$PROJECT_DIR$/templates/test_data_view.html" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/routes/__init__.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/routes/maintenance.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/utils/audit.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/utils/audit.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/app/utils/session_manager.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -177,7 +170,7 @@
       <workItem from="1752910883881" duration="13999000" />
       <workItem from="1752997682634" duration="31871000" />
       <workItem from="1753090002313" duration="17461000" />
-      <workItem from="1753165589429" duration="2456000" />
+      <workItem from="1753165589429" duration="4327000" />
     </task>
     <task id="LOCAL-00001" summary="grafica e logica aggiornata">
       <option name="closed" value="true" />

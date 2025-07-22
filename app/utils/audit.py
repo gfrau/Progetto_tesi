@@ -41,7 +41,7 @@ def log_audit_event(event_type: str, username: str, success: bool, ip: str = "un
             "code": event_type,
             "display": DISPLAY_MAP.get(event_type, event_type)
         },
-        "action": action or "E",  # default to Execute (E)
+        "action": action or "E",
         "recorded": datetime.utcnow().isoformat() + "Z",
         "outcome": "0" if success else "4",
         "agent": [
