@@ -1,0 +1,33 @@
+[
+  {
+    "resourceType": "Observation",
+    "id": "",
+    "status": "final",
+    "code": {
+      "coding": [
+        {
+          "system": "http://loinc.org",
+          "code": "8310-5",
+          "display": "Body temperature"
+        }
+      ],
+      "text": "Body temperature"
+    },
+    "valueQuantity": {
+      "value": 36.77,
+      "unit": "°C"
+    },
+    "effectiveDateTime": "2023-12-12T09:49:17Z",
+    "subject": {
+      "identifier": {
+        "value": "codiceFiscale"
+      }
+    },
+    "identifier": [
+      {
+        "system": "http://fhir.example.org/identifiers",
+        "value": "obse77b4bb9"
+      }
+    ]
+  }
+  ]

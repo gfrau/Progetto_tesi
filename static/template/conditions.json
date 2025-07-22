@@ -1,0 +1,43 @@
+{
+  "resourceType": "Condition",
+  "id": "example-condition-id",
+  "clinicalStatus": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-clinical",
+        "code": "active",
+        "display": "Active"
+      }
+    ],
+    "text": "Active"
+  },
+  "verificationStatus": {
+    "coding": [
+      {
+        "system": "http://terminology.hl7.org/CodeSystem/condition-ver-status",
+        "code": "confirmed",
+        "display": "Confirmed"
+      }
+    ],
+    "text": "Confirmed"
+  },
+  "code": {
+    "coding": [
+      {
+        "system": "http://hl7.org/fhir/sid/icd-10",
+        "code": "123456",
+        "display": "Condizione generica"
+      }
+    ],
+    "text": "Condizione di esempio"
+  },
+  "subject": {
+    "identifier": {
+      "system": "http://fhir.example.org/identifiers",
+      "value": "codiceFiscale"
+    },
+    "reference": "Patient/example-patient-id"
+  },
+  "recordedDate": "2020-01-15",
+  "onsetDateTime": "2020-01-01"
+}

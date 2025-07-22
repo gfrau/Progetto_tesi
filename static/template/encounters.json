@@ -1,0 +1,26 @@
+[
+  {
+    "resourceType": "Encounter",
+    "id": "",
+    "status": "planned",
+    "class": {
+      "coding": [
+        {
+          "system": "http://terminology.hl7.org/CodeSystem/v3-ActCode",
+          "code": "EMER",
+          "display": "Inpatient"
+        }
+      ]
+    },
+    "subject": {
+      "identifier": {
+        "system": "http://fhir.example.org/identifiers",
+        "value": "codiceFiscale"
+      }
+    },
+    "period": {
+      "start": "2023-01-09T02:00:00Z",
+      "end": "2023-01-09T04:08:00Z"
+    }
+  }
+]
