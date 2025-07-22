@@ -102,6 +102,7 @@ Visita l'endpoint:
 
 ```
 http://localhost:8000/docs
+http://localhost:8000/redoc
 ```
 
 per consultare e testare le API REST generate automaticamente con FastAPI/OpenAPI.
